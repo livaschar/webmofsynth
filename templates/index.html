@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Test with online tools</title>
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" href="static/style.css">
+    
+</head>
+
+</head>
+
+
+<body>
+    <div class="header">
+        <h1></h1>
+    </div>
+
+    <h2>A Computational tool toward synthetic likelihood predictions of MOFs</h2>
+    <p>Provided by Materials Modeling & Design group of the University of Crete</p>
+
+    <div class="file-upload-container">
+        <h3>Please insert your file</h3>
+        <form action="upload.php" method="post" enctype="multipart/form-data">
+            <input type="file" id="file" name="file">
+            <label for="file">Choose a file</label>
+            <button onclick="fetchResults()" type="submit">Upload</button>
+        </form>
+    </div>
+
+    <div class="options-container">
+        <h3>Choose the supercell limit (Angstroms):</h3>
+        <form action="submit_options.php" method="post">
+            <input type="radio" id="optionNone" name="option" value="none">
+            <label for="optionNone">Nan</label><br>
+            <input type="radio" id="option5" name="option" value="5">
+            <label for="option5">5</label><br>
+            <input type="radio" id="option10" name="option" value="10">
+            <label for="option10">10</label><br>
+            <input type="radio" id="option15" name="option" value="15">
+            <label for="option15">15</label><br>
+            <input type="radio" id="option20" name="option" value="20">
+            <label for="option20">20</label><br>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    
+    <div class="progress-container">
+        <h3>Progress bar</h3>
+        <div class="progress-bar">
+            <div class="progress-bar-fill"></div>
+        </div>
+    </div>
+
+
+
+
+
+</body>
+</html>
