@@ -22,7 +22,7 @@ from . modules.mof import MOF
 from . modules.linkers import Linkers
 from . modules.other import (copy, settings_from_file,
                              user_settings, load_objects,
-                             write_txt_results, write_xlsx_results)
+                             write_txt_results, write_xlsx_results, write_csv_results)
 
 def main(directory, function, supercell_limit):
     r"""
@@ -62,7 +62,7 @@ def main(directory, function, supercell_limit):
         sys.exit()
 
 
-def main_run(directory, supercell_limit):
+def main_run(directory, supercell_limit, EXECUTION_FOLDER):
     r"""
     Perform the synthesizability evaluation for MOFs in the specified directory.
 
@@ -77,10 +77,18 @@ def main_run(directory, supercell_limit):
         A tuple containing instances of MOF and Linkers classes, and lists of MOFs with
         faults in supercell creation and fragmentation procedures.
     """
+    print('main_run: ', os.getcwd())
+
     # Create the working directory
     os.makedirs("Synth_folder", exist_ok=True)
 
     # If settings file exists, read settings from there else ask for user input
+    Linkers.settings_path = os.path.join(EXECUTION_FOLDER, 'input_data/settings.txt')
+    print("Linkers.settings_path edit: ", Linkers.settings_path)
+    Linkers.job_sh_path = os.path.join(EXECUTION_FOLDER, 'input_data')
+    print("Linkers.job_sh_path edit: ", Linkers.job_sh_path)
+    MOF.src_dir = EXECUTION_FOLDER
+
     if os.path.exists(Linkers.settings_path):
         run_str, job_sh, opt_cycles = settings_from_file(Linkers.settings_path)
     else:
@@ -88,11 +96,13 @@ def main_run(directory, supercell_limit):
 
     Linkers.opt_settings(run_str, opt_cycles, job_sh)
 
+    
     print(f'  \033[1;32m\nSTART OF SYNTHESIZABILITY EVALUATION\033[m')
 
     # A list of cifs from the user soecified directory
     user_dir = os.path.join(f"./{directory}")
     cifs = [item for item in os.listdir(user_dir) if item.endswith(".cif")]
+    
 
     if cifs == []:
         print(f"\nWARNING: No cif was found in: {user_dir}. Please check run.py\n")
@@ -117,7 +127,7 @@ def main_run(directory, supercell_limit):
 
             # Create supercell, do the fragmentation, extract one linker,
             # calculate single point energy
-            supercell_check, _ = mof.create_supercell(supercell_limit)
+            supercell_check, _ = mof.create_supercell(supercell_limit)        
             mof.fragmentation()
             mof.obabel()
             mof.single_point()
@@ -192,12 +202,11 @@ def main_run(directory, supercell_limit):
     with open('smiles_id_dictionary.txt', 'w') as file:
         for key, value in smiles_id_dict.items():
             file.write(f'{key} : {value}\n')
-
+    
+    return 1
     return MOF.instances, Linkers.instances, MOF.fault_fragment, MOF.fault_smiles
 
-
-
-def check_opt():
+def check_opt(EXECUTION_FOLDER, len_files):
     r"""
     Check the optimization status of linker molecules.
 
@@ -206,7 +215,15 @@ def check_opt():
     Tuple
         A tuple containing lists of converged and not converged linker instances.
     """
-    _, linkers, _ = load_objects()
+    Linkers.settings_path = os.path.join(EXECUTION_FOLDER, 'input_data/settings.txt')
+    print("Linkers.settings_path edit: ", Linkers.settings_path)
+    Linkers.job_sh_path = os.path.join(EXECUTION_FOLDER, 'input_data')
+    print("Linkers.job_sh_path edit: ", Linkers.job_sh_path)
+    MOF.src_dir = EXECUTION_FOLDER
+
+    os.chdir(EXECUTION_FOLDER)
+    
+    _, linkers, _= load_objects(EXECUTION_FOLDER)
 
     converged, not_converged = Linkers.check_optimization_status(linkers)
     
@@ -218,9 +235,12 @@ def check_opt():
         for instance in not_converged:
             f.write(f"{instance.smiles_code} {instance.mof_name}\n")
     
-    return Linkers.converged, Linkers.not_converged
+    if len(Linkers.converged) == len_files:
+        return 1
+    else:
+        return 0
    
-def export_results():
+def export_results(EXECUTION_FOLDER):
     r"""
     Export the results of the synthesizability evaluation.
 
@@ -229,8 +249,24 @@ def export_results():
     Tuple
         A tuple containing file paths for the generated text and Excel result files.
     """
-    cifs, linkers, id_smiles_dict= load_objects()
+    from . modules.other import load_objects
+    Linkers.settings_path = os.path.join(EXECUTION_FOLDER, 'input_data/settings.txt')
+    print("Linkers.settings_path edit: ", Linkers.settings_path)
+    Linkers.job_sh_path = os.path.join(EXECUTION_FOLDER, 'input_data')
+    print("Linkers.job_sh_path edit: ", Linkers.job_sh_path)
+    MOF.src_dir = EXECUTION_FOLDER
 
+    os.chdir(EXECUTION_FOLDER)
+    
+    cifs, linkers, id_smiles_dict= load_objects(EXECUTION_FOLDER)
+    
+    ''' down form here not checked
+    basiccally you have to put the path to every function
+    make sure that it is executed from random user
+
+    print(os.getcwd()) and change if you have to the 'path'
+    '''
+    
     Linkers.check_optimization_status(linkers)
 
     for linker in Linkers.converged:
@@ -246,12 +282,11 @@ def export_results():
     
     for instance in MOF.instances:
         print(instance.name, instance.de, instance.rmsd)
-    
-    print(results_list)
-    
-    exit()
 
-    # write_txt_results(results_list, MOF.results_txt_path)
-    write_xlsx_results(results_list, MOF.results_xlsx_path)
+
+    txt_path = os.path.join(EXECUTION_FOLDER, MOF.results_txt_path)
+    write_txt_results(results_list, txt_path)
+    write_csv_results(results_list, os.path.join(EXECUTION_FOLDER, MOF.results_csv_path))
+    return 1
 
     return MOF.results_txt_path, MOF.results_xlsx_path

@@ -3,17 +3,21 @@ import pickle
 import os
 import openpyxl
 import numpy as np
+import csv
 
-def load_objects():
+def load_objects(path):
     
     id_smiles_dict = {}
+    cifs_pkl = os.path.join(path, 'cifs.pkl')
+    linkers_pkl = os.path.join(path, 'linkers.pkl')
+    smiles_id_dictionary = os.path.join(path, 'smiles_id_dictionary.txt')
 
-    with open('cifs.pkl', 'rb') as file:
+    with open(cifs_pkl, 'rb') as file:
         cifs = pickle.load(file)
-    with open('linkers.pkl', 'rb') as file:
+    with open(linkers_pkl, 'rb') as file:
         linkers = pickle.load(file)
     
-    with open('smiles_id_dictionary.txt', 'r') as file:
+    with open(smiles_id_dictionary, 'r') as file:
         lines = file.readlines()
         for line in lines:
             id_smiles_dict[line.split()[-1]] = line.split()[0]
@@ -67,10 +71,11 @@ def write_txt_results(results_list, results_txt_path):
     with open(results_txt_path, "w") as f:
         f.write('{:<50} {:<37} {:<37} {:<30} {:<10} {:<60} {:<30} {:<30} {:<10} \n'.format("NAME", "ENERGY_(OPT-SP)_[au]", "ENERGY_(OPT-SP)_[kcal/mol]", "RMSD_[A]", "LINKER_(CODE)", "LINKER_(SMILES)", "Linker_SinglePointEnergy_[au]", "Linker_OptEnergy_[au]", 'Opt_status'))
         for i in results_list:
-            if np.isnan(np.sum(i)):
-                f.write(f"{i[0]:<50} {i[1]:<37} {i[2]:<37} {i[3]:<30} {i[4]:<10} {i[5]:<60} {i[6]:<30} {i[7]:<30} {i[8]:<10}\n") 
-            else:
-                f.write(f"{i[0]:<50} {i[1]:<37.3f} {i[2]:<37.3f} {i[3]:<30.3f} {i[4]:<10} {i[5]:<60} {i[6]:<30.3f} {i[7]:<30.3f} {i[8]:<10}\n")
+            # if np.isnan(j for j in i):
+            #     f.write(f"{i[0]:<50} {i[1]:<37} {i[2]:<37} {i[3]:<30} {i[4]:<10} {i[5]:<60} {i[6]:<30} {i[7]:<30} {i[8]:<10}\n") 
+            # else:
+            i[1] = np.NaN
+            f.write(f"{i[0]:<50} {i[1]:<37.3f} {i[2]:<37.3f} {i[3]:<30.3f} {i[4]:<10} {i[5]:<60} {i[6]:<30.3f} {i[7]:<30.3f} {i[8]:<10}\n")
 
 def write_xlsx_results(results_list, results_xlsx_path):
     
@@ -88,6 +93,22 @@ def write_xlsx_results(results_list, results_xlsx_path):
 
     # Save the workbook to the specified Excel file
     workbook.save(results_xlsx_path)
+
+def write_csv_results(results_list, results_csv_path):
+    # Define headers
+    headers = ["NAME", "ENERGY_(OPT-SP)_[au]", "ENERGY_(OPT-SP)_[kcal/mol]", "RMSD_[A]", "LINKER_(CODE)", "LINKER_(SMILES)", "Linker_SinglePointEnergy_[au]", "Linker_OptEnergy_[au]", "Opt_status"]
+    
+    # Open the CSV file for writing
+    with open(results_csv_path, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        
+        # Write headers
+        writer.writerow(headers)
+        
+        # Write results
+        for result_row in results_list:
+            writer.writerow(result_row)
+
 
 def delete_files_except(folder_path, exceptions):
     """

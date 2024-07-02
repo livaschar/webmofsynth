@@ -1,54 +1,59 @@
+
+/* Reset default margin and padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body styles */
 body {
     font-family: Arial, sans-serif;
     text-align: center;
     margin-top: 50px;
-    /* background: linear-gradient(to bottom, #cecdcd, #929191);
-    min-height: 100vh; Ensures gradient covers the entire viewport */
     background-image: url('images/backgrounds/background_image_2.png');
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
-    color: rgb(0, 0, 0); /* Ensure text is readable on the background */
-}
-h1 {
-    color: #000000;
-}
-h2 {
-    color: #000000;
-}
-p {
-    color: #000000;
+    color: #000;
 }
 
+/* Headings and paragraphs */
+h1, h2, p {
+    color: #000;
+}
+
+/* Header styles */
 .header {
     width: 100%;
-    height: 120px; /* Adjust height as needed */
+    height: 120px;
     background-image: url('images/logo/final_black_1-removebg-preview.png');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    text-align: center; /* Centers any content within the header */
-    color: white; /* Text color for header content */
-    /* background-color: rgba(255, 255, 255, 0.8); */
+    text-align: center;
+    color: #fff;
 }
+
 .header h1 {
-    margin-top: 10px; /* Adjust top margin to vertically center the content */
+    margin-top: 10px;
     font-size: 2.5em;
 }
 
-
+/* File upload container styles */
 .file-upload-container {
     width: 300px;
     margin: 50px auto;
     padding: 20px;
-    /* border: 2px solid #000000; */
     border-radius: 10px;
     text-align: center;
-    background-color: rgba(86,126,138, 0.4);
+    background-color: rgba(86, 126, 138, 0.4);
 }
+
 .file-upload-container input[type="file"] {
     display: none;
 }
+
 .file-upload-container label {
     display: block;
     margin: 20px 0;
@@ -57,66 +62,126 @@ p {
     border-radius: 5px;
     cursor: pointer;
 }
+
 .file-upload-container button {
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
-    background-color: #000000;
-    color: white;
+    background-color: #000;
+    color: #fff;
     cursor: pointer;
 }
+
 .file-upload-container button:hover {
     background-color: #218838;
 }
 
+.file-upload-container #fileList {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
 
+.file-upload-container #fileList p {
+    margin: 5px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Options container styles */
 .options-container {
     width: 300px;
     margin: 20px auto;
     padding: 20px;
     text-align: left;
-    /* border: 2px solid #000000; */
     border-radius: 10px;
-    background-color: rgba(86,126,138, 0.4);
+    background-color: rgba(86, 126, 138, 0.4);
 }
+
 .options-container h3 {
     text-align: center;
 }
+
 .options-container button {
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
-    background-color: #000000;
-    color: white;
+    background-color: #000;
+    color: #fff;
     cursor: pointer;
 }
+
 .options-container button:hover {
     background-color: #218838;
 }
+
 .options-container input[type="radio"] {
-margin: 7px 0; /* Adds margin top and bottom of each radio button */
-margin-right: 5px; /* Adds margin to the right of each radio button */
+    margin: 7px 0;
+    margin-right: 5px;
 }
 
-
+/* Progress container styles */
 .progress-container {
     width: 300px;
     margin: 20px auto;
     padding: 20px;
     text-align: center;
 }
+
 .progress-bar {
     width: 100%;
     background-color: #f3f3f3;
     border-radius: 5px;
     overflow: hidden;
 }
+
 .progress-bar-fill {
     height: 20px;
     background-color: #28a745;
     width: 0;
     transition: width 0.25s;
 }
+
 .progress-container h3 {
     text-align: center;
+}
+
+/* Table container styles */
+.table-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.table th, .table td {
+    padding: 8px;
+    text-align: center;
+}
+
+.table th {
+    background-color: #888787;
+    color: #fff;
+}
+
+.table-striped tbody tr:nth-child(odd) {
+    background-color: #23da60;
+}
+
+.table-striped tbody tr:nth-child(even) {
+    background-color: #da3a7c;
+}
+
+.table-bordered {
+    border: 1px solid #424242;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #e7e1e4;
 }

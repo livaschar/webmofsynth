@@ -8,9 +8,9 @@
     <title>Test with online tools</title>
     <link rel="shortcut icon" href="#">
     <link rel="stylesheet" href="static/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="static/script.js"></script>
     
-</head>
-
 </head>
 
 
@@ -21,19 +21,23 @@
 
     <h2>A Computational tool toward synthetic likelihood predictions of MOFs</h2>
     <p>Provided by Materials Modeling & Design group of the University of Crete</p>
-
+        
     <div class="file-upload-container">
         <h3>Please insert your file</h3>
-        <form action="upload.php" method="post" enctype="multipart/form-data">
-            <input type="file" id="file" name="file">
-            <label for="file">Choose a file</label>
-            <button onclick="fetchResults()" type="submit">Upload</button>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" id="file" name="file" multiple onchange="showSelectedFiles()">
+            <label for="file">Choose files</label>
+            <div id="fileList"></div>
+            <button type="button" onclick="uploadFiles()">Upload Files</button>
         </form>
+        <div id="uploadStatus"></div>
     </div>
+    
+    <div id="uploadMessage"></div>
 
     <div class="options-container">
         <h3>Choose the supercell limit (Angstroms):</h3>
-        <form action="submit_options.php" method="post">
+        <form id="submitForm">
             <input type="radio" id="optionNone" name="option" value="none">
             <label for="optionNone">Nan</label><br>
             <input type="radio" id="option5" name="option" value="5">
@@ -44,9 +48,11 @@
             <label for="option15">15</label><br>
             <input type="radio" id="option20" name="option" value="20">
             <label for="option20">20</label><br>
-            <button type="submit">Submit</button>
+            <button type="button" onclick="submitJob()">Submit</button>
         </form>
     </div>
+    
+    <div id="jobStatus"></div>
     
     <div class="progress-container">
         <h3>Progress bar</h3>
@@ -54,10 +60,11 @@
             <div class="progress-bar-fill"></div>
         </div>
     </div>
+    
+    <button type="button" onclick="fetchResults()">fetchResults</button>
+    <button type="button" onclick="readCSV()">Read csv</button>    
+    <button type="button" onclick="downloadButton()">Download CSV</button>
 
-
-
-
-
+    <div id="results"></div>
 </body>
 </html>

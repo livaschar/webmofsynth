@@ -20,6 +20,7 @@ class MOF:
     path_to_linkers_directory = os.path.join(synth_path, '_Linkers_')
     results_txt_path = os.path.join(synth_path, f'{output_file_name}.txt')
     results_xlsx_path = os.path.join(synth_path, f'{output_file_name}.xlsx')
+    results_csv_path = os.path.join(synth_path, f'{output_file_name}.csv')
     run_str_sp = "bash -l -c 'module load turbomole/7.02; x2t linker.xyz > coord; uff; t2x -c > final.xyz'"
 
     instances = []
@@ -117,6 +118,7 @@ class MOF:
         copy(self.init_path, self.cif2cell_path, f"{self.name}.cif")
         
         os.chdir(self.cif2cell_path)
+
        
         ''' cif2cell way '''
         # command = ["cif2cell", "-f", f"{self.name}.cif", "--supercell=[2,2,2]", "-o", f"{self.name}_supercell.cif", "-p", "cif"]   
@@ -486,11 +488,13 @@ class MOF:
         This static method performs analysis on MOF instances, calculating binding energies,
         RMSD values, and storing the results in a list.
         """
+        print('mof.analyse:', os.getcwd())
         results_list = []
 
         for mof in cifs:
             linker = next((obj for obj in linkers if obj.smiles_code == mof.linker_smiles and obj.mof_name == mof.name), None)
 
+            print('mof.analyse2:', os.path.join(mof.sp_path, "uffgradient"))
             with open(os.path.join(mof.sp_path, "uffgradient"), 'r') as f:
                 lines = f.readlines()
             for line in lines:
@@ -637,6 +641,7 @@ class MOF:
                     
         self.rmsd = minimum
     
+        print('mof.analyse3: ', self.src_dir)
         os.chdir(self.src_dir)
     
     @staticmethod
