@@ -14,7 +14,8 @@ body {
     background-image: url('images/backgrounds/background_image_2.png');
     background-size: cover;
     background-repeat: no-repeat;
-    background-attachment: fixed;
+    background-attachment: scroll;
+    /* background-attachment: fixed; */
     color: #000;
 }
 
@@ -34,12 +35,11 @@ h1, h2, p {
     text-align: center;
     color: #fff;
 }
-
 .header h1 {
     margin-top: 10px;
     font-size: 2.5em;
 }
-
+/* ------------------------------- */
 /* File upload container styles */
 .file-upload-container {
     width: 300px;
@@ -87,22 +87,33 @@ h1, h2, p {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+/* ------------------------------- */
+/* ------------------------------- */
 
+
+/* ------------------------------- */
 /* Options container styles */
+
 .options-container {
     width: 300px;
     margin: 20px auto;
     padding: 20px;
-    text-align: left;
     border-radius: 10px;
     background-color: rgba(86, 126, 138, 0.4);
+    text-align: left; /* Align text and options to the left */
 }
 
 .options-container h3 {
     text-align: center;
 }
 
+.options-container .options {
+    margin-bottom: 20px; /* Space between options and button */
+}
+
 .options-container button {
+    display: block; /* Make button a block element */
+    margin: 0 auto; /* Center button horizontally */
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
@@ -119,8 +130,139 @@ h1, h2, p {
     margin: 7px 0;
     margin-right: 5px;
 }
+/* ------------------------------- */
+/* ------------------------------- */
 
-/* Progress container styles */
+
+
+/* ------------------------------- */
+/* Table container styles */
+#results {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.table {
+    width: 20%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.table th, .table td {
+    padding: 8px;
+    text-align: center;
+}
+
+.table th {
+    background-color: #888787;
+    color: #fff;
+}
+
+.table-striped tbody tr:nth-child(odd) {
+
+    background-color: #91a8f3;
+}
+
+.table-striped tbody tr:nth-child(even) {
+    color: #fff;    
+    background-color: #656fc5;
+}
+
+.table-bordered {
+    border: 1px solid #424242;
+}
+
+.table-hover tbody tr:nth-child(odd):hover {
+    background-color: #e7e1e4;
+}
+.table-hover tbody tr:nth-child(even):hover {
+    background-color: #a3a1a1;
+}
+/* ------------------------------- */
+/* ------------------------------- */
+
+
+/* ------------------------------- */
+/* Loader container styles */
+.loader-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 40px;
+    margin-top: 2px; 
+}
+.loader {
+    display: none; /* Initially hidden */
+    align-self: center;
+    position: relative;
+    width: 40px;
+    height: 40px;
+    margin-top: 20px;
+    margin-bottom: 20px;;
+}
+
+.loader::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin-top: -20px;
+    margin-bottom: -20px;
+    margin-left: -20px;
+    border: 5px solid #007bff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+/* ------------------------------- */
+/* ------------------------------- */
+
+
+/* ------------------------------- */
+/* Buttons container styles */
+.button-container {
+    text-align: center;
+    margin-top: 20px;
+}
+.button-container button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 1em;
+    margin: 0 10px;
+}
+.button-container button:hover {
+    background-color: #0056b3;
+}
+/* ------------------------------- */
+/* ------------------------------- */
+
+
+
+
+
+
+
+
+/* ------------------------------- */
+/* Progress bar container styles */
 .progress-container {
     width: 300px;
     margin: 20px auto;
@@ -145,43 +287,5 @@ h1, h2, p {
 .progress-container h3 {
     text-align: center;
 }
-
-/* Table container styles */
-.table-container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    height: 100vh;
-}
-
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-}
-
-.table th, .table td {
-    padding: 8px;
-    text-align: center;
-}
-
-.table th {
-    background-color: #888787;
-    color: #fff;
-}
-
-.table-striped tbody tr:nth-child(odd) {
-    background-color: #23da60;
-}
-
-.table-striped tbody tr:nth-child(even) {
-    background-color: #da3a7c;
-}
-
-.table-bordered {
-    border: 1px solid #424242;
-}
-
-.table-hover tbody tr:hover {
-    background-color: #e7e1e4;
-}
+/* ------------------------------- */
+/* ------------------------------- */

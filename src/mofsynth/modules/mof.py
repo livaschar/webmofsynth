@@ -29,6 +29,7 @@ class MOF:
     fault_smiles = []    
     smiles_id_dict = {}
     new_instances = []
+    already_runned = []
 
     def __init__(self, name):
         r"""
@@ -54,8 +55,13 @@ class MOF:
         This would create a new instance of the 'mof' class with the name 'MOF1', and initialize its attributes accordingly.
         """
 
-        MOF.instances.append(self)
+        
         self.name = name
+        if self.name in MOF.already_runned:
+            MOF.instances.pop()
+            return
+        else:
+            MOF.instances.append(self)
         self._initialize_paths()
         self.linker_smiles = ''
         self.opt_energy = np.nan
@@ -377,7 +383,7 @@ class MOF:
 
 
     @classmethod
-    def find_unique_linkers(cls):
+    def find_unique_linkers(cls, EXECUTION_FOLDER):
         r"""
         Process MOF instances to assign unique identifiers to their SMILES codes and organize data for linkers.
         
@@ -424,6 +430,7 @@ class MOF:
 
         # Iterate through mof instances
         unique_id = 0
+
         for instance in cls.instances:
 
             # Take the smiles code for this linker
@@ -431,6 +438,11 @@ class MOF:
             smiles = MOF.find_smiles_obabel(instance.obabel_path)
 
             if smiles != None:
+                # exist_check = False
+                # for instance_2 in cls.new_instances:
+                #     if instance.name == instance_2.name:
+                #         exist_check = True
+                # if not exist_check:
                 cls.new_instances.append(instance)
             else:
                 MOF.fault_smiles.append(instance.name)
@@ -446,8 +458,9 @@ class MOF:
             Linkers(instance.linker_smiles, instance.name)
 
             copy(os.path.join(instance.fragmentation_path,"Output/MetalOxo"), os.path.join(MOF.path_to_linkers_directory, instance.linker_smiles, instance.name), 'linkers.cif', 'linkers.cif')
+            
             copy(instance.obabel_path, os.path.join(MOF.path_to_linkers_directory, instance.linker_smiles, instance.name), 'linker.xyz', 'linker.xyz')
-
+        
         cls.instances = cls.new_instances
 
         return cls.smiles_id_dict
@@ -488,13 +501,11 @@ class MOF:
         This static method performs analysis on MOF instances, calculating binding energies,
         RMSD values, and storing the results in a list.
         """
-        print('mof.analyse:', os.getcwd())
         results_list = []
 
         for mof in cifs:
             linker = next((obj for obj in linkers if obj.smiles_code == mof.linker_smiles and obj.mof_name == mof.name), None)
 
-            print('mof.analyse2:', os.path.join(mof.sp_path, "uffgradient"))
             with open(os.path.join(mof.sp_path, "uffgradient"), 'r') as f:
                 lines = f.readlines()
             for line in lines:
@@ -507,32 +518,9 @@ class MOF:
                 mof.opt_status = linker.opt_status
                 mof.calc_de(best_opt_energy_dict)
                 mof.calc_rmsd(best_opt_energy_dict)
+
             
-                ''' SKIP FOR NOW '''
-                '''
-                question = input(f'\nDid not find linker for: {mof.name}. Change smiles for {mof.name}? [y/n]: ')
-                if question == 'n':
-                    print(f"Did not find linker for: {mof.name}. Zero values will be appointed")
-                    mof.opt_energy = 0.
-                    mof.de = 0.
-                    mof.rmsd = 0.
-                    with open(os.path.join(mof.sp_path, "uffgradient"), 'r') as f:
-                        lines = f.readlines()
-                    for line in lines:
-                        if "cycle" in line:
-                            mof.sp_energy = float(line.split()[6])
-                            break
-                else:
-                    new_smiles = input(f'\nNew smile code: ')
-                    mof.change_smiles(new_smiles)
-                    linker = next((obj for obj in linkers if obj.smiles == mof.linker_smiles and obj.mof_name == mof.name), None)
-                    mof.opt_energy = float(linker.opt_energy)
-                    mof.calc_de(dict)
-                    mof.calc_rmsd(mof, dict)
-                '''
-                ''' ----------- ''' 
-            
-            results_list.append([mof.name, mof.de, mof.de*627.51, mof.rmsd, mof.linker_smiles, id_smiles_dict[mof.linker_smiles], mof.sp_energy, mof.opt_energy, mof.opt_status])
+            results_list.append([mof.name, round(mof.de, 1), round(mof.de * 627.51, 1), round(mof.rmsd, 2), mof.linker_smiles, id_smiles_dict[mof.linker_smiles], round(mof.sp_energy, 4), round(mof.opt_energy, 4), mof.opt_status])
         
         return results_list
     
@@ -641,7 +629,6 @@ class MOF:
                     
         self.rmsd = minimum
     
-        print('mof.analyse3: ', self.src_dir)
         os.chdir(self.src_dir)
     
     @staticmethod

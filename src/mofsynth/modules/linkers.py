@@ -196,21 +196,14 @@ class Linkers:
         -------
         Tuple
             A tuple containing lists of converged and not converged linker instances.
-        """        
+        """
 
-        for linker in linkers_list:   
-
-            # if os.path.exists(os.path.join(linker.opt_path)) == False:
-            #     print(f'\n{linker.opt_path} does not exits. Please check the _Linkers_ folder.')
-            #     new_smiles = input('Change the smiles to check again: ')
-            #     linker.change_smiles(new_smiles)
-            #     cls.converged.append(linker)
-
+        for linker in linkers_list:
+            
             if os.path.exists(os.path.join(linker.opt_path, 'uffconverged')):
-                # print(f'\nOptimization converged succesfully for {linker.smiles_code} [MOF = {linker.mof_name}]')
-                linker.opt_status = 'converged'
                 cls.converged.append(linker)
-
+                linker.opt_status = 'converged'
+        
             elif os.path.exists(os.path.join(linker.opt_path, 'not.uffconverged')):
                 cls.not_converged.append(linker)
             
@@ -219,29 +212,6 @@ class Linkers:
         
             else:
                 cls.not_converged.append(linker)
-        
-        'Takes a lot of time to check every not converged instance. Find a way to minimize this time'
-        # custom = []
-        # for linker in cls.not_converged:
-        #         print(f'  \033[1;31m\nWARNING: Optimization did not converge for {linker.smiles_code} [MOF = {linker.mof_name}]\033[m')
-        #         print('Path: ', linker.opt_path, '\n')
-        #         print(' Option 1: Rerun optimization with more cycles\n',
-        #               f'Option 2: Add manually the uffconverged file and add the energy at the uffenergy file at {linker.opt_path}\n',
-        #               'Option 3: Skip this instance\n')
-        #         question = input('[1/2/3]: ')
-        #         if question == '1':
-        #             linker.opt_cycles = input(f'\nPlease specify the number of optimization cycles (Last opt was run with {linker.opt_cycles}): ')
-        #             linker.optimize(rerun = True)
-        #         elif question == '2':
-        #             question = input(f'\nAdd manually the necessary files and values at {linker.opt_path}\n')
-        #             input('Press ENTER to continue...')
-        #             custom.append(linker)
-        #         else:
-        #             pass
-
-        # if custom != []:
-        #     cls.converged.extend(custom)
-        #     cls.not_converged = [i for i in cls.not_converged if i not in custom]
 
         return cls.converged, cls.not_converged
     

@@ -1,60 +1,99 @@
 from src.mofsynth import utils
+from src.mofsynth.modules.mof import MOF
+from src.mofsynth.modules.linkers import Linkers
 from werkzeug.utils import secure_filename
 import subprocess
 import time
 import os
 import pandas as pd
 from flask import Flask, jsonify, render_template, request, redirect, url_for, session, send_file
+import secrets
+import string
+import shutil
 app = Flask(__name__)
 
+''' random FOLDER GENERATOR '''
+def generate_random_string(length):
+    characters = string.ascii_letters  # Includes both uppercase and lowercase letters
+    return ''.join(secrets.choice(characters) for _ in range(length))
+
+# Function to create session-specific folders if they don't exist
+def create_session_folders(random_str):
+    session_folder = os.path.join(BASE_FOLDER, random_str)
+    UPLOAD_FOLDER = os.path.expanduser('~/TEST/repos/%s/uploads' %random_str)
+    INPUT_FOLDER = os.path.expanduser('~/TEST/repos/%s/input_data' %random_str)
+    EXECUTION_FOLDER = session_folder
+
+    # Create folders if they don't exist
+    for folder in [session_folder, UPLOAD_FOLDER, INPUT_FOLDER]:
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+    
+    # Copy files from the source folder to the input folder
+    for item in os.listdir(SOURCE_FOLDER):
+        s = os.path.join(SOURCE_FOLDER, item)
+        d = os.path.join(INPUT_FOLDER, item)
+        if os.path.isdir(s):
+            shutil.copytree(s, d, dirs_exist_ok=True)
+        else:
+            shutil.copy2(s, d)
+
+    return UPLOAD_FOLDER, EXECUTION_FOLDER
+
+BASE_FOLDER = os.path.expanduser('~/TEST/repos')
+SOURCE_FOLDER = '/home/haris/TEST/repos/webmofsynth/src/mofsynth/input_data'
 original_folder = os.getcwd()
-
-# Define a folder to store uploaded files
-# UPLOAD_FOLDER = '../random_user_dion/uploads'
-UPLOAD_FOLDER = os.path.expanduser('~/TEST/repos/random_user_dion/uploads')
-ALLOWED_EXTENSIONS = {'cif'}
-MAX_FILESIZE = 5 * 1024 * 1024  # 5 MB
+# Necessary for using sessions
+# app.secret_key = '3224dd25ca82b528ad1c59c082185f2880dc59c9c38cf98528acbedc22e086b0'
+app.secret_key = generate_random_string(20)
+random_str = generate_random_string(10)
+UPLOAD_FOLDER, EXECUTION_FOLDER = create_session_folders(random_str)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = MAX_FILESIZE
-
-# Ensure the upload folder exists
-if not os.path.exists(app.config['UPLOAD_FOLDER']):
-    os.makedirs(app.config['UPLOAD_FOLDER'])
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-# Configuration
-EXECUTION_FOLDER = os.path.expanduser('~/TEST/repos/random_user_dion')
 app.config['EXECUTION_FOLDER'] = EXECUTION_FOLDER
 
+''' --------------------------- '''
 
-app.secret_key = 'any_key'  # Necessary for using sessions
 
+# File requirements
+ALLOWED_EXTENSIONS = {'cif'}
+MAX_FILESIZE = 5 * 1024 * 1024  # 5 MB
+app.config['MAX_CONTENT_LENGTH'] = MAX_FILESIZE
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/upload', methods=['POST'])
 
+@app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
 
     files = request.files.getlist('file')
 
-    # Initialize file count in session if not already present
+    # Initialize file count and filenames in session if not already present
     if 'file_count' not in session:
         session['file_count'] = 0
+    if 'filenames' not in session:
+        session['filenames'] = []
 
     # Check if file count exceeds the limit (10)
-    if session['file_count'] + len(files) > 10:
+    if len(files) > 10:
         return jsonify({'error': 'Upload limit exceeded. You can upload up to 10 files.'}), 400
 
-    filenames = []
+    # Delete old files
+    for filename in session['filenames']:
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        if os.path.exists(file_path):
+            os.remove(file_path)
 
+    # Reset the session file count and filenames
+    session['file_count'] = 0
+    session['filenames'] = []
+
+    filenames = []
     for file in files:
         if file.filename == '':
             return jsonify({'error': 'No selected file'}), 400
@@ -64,11 +103,10 @@ def upload_file():
                 return jsonify({'error': 'File size exceeds limit of 5MB'}), 400
 
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             filenames.append(filename)
-
-            # Increment file count in session
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             session['file_count'] += 1
+            session['filenames'].append(filename)
         else:
             return jsonify({'error': 'Invalid file type. Allowed file types: .cif'}), 400
 
@@ -81,52 +119,57 @@ def submit_job():
     option = request.form.get('option')
     if not option:
         return jsonify({'error': 'No option selected'})
-
+    
     original_folder = os.getcwd()
-    print("Must be webmofsynth: ", original_folder)
 
     try:
         # Change directory to the execution folder
         os.chdir(EXECUTION_FOLDER)
-        print("Must be random_user_dion id: ", os.getcwd())
-
+            
         # Execute the command and capture output
         result = utils.main_run('uploads', option, EXECUTION_FOLDER)
-        # time.sleep(10)
 
         # Check for errors or success based on command output
         if result == 1:
-            return jsonify({'message': 'Job submitted successfully'})
+            counter = 0
+            finished = False
+            while not finished and counter < 10 :
+                finished = utils.check_opt(EXECUTION_FOLDER, session.get('file_count', 0))
+                time.sleep(5)
+                counter += 1
+            
+            if finished:
+                result = utils.export_results(EXECUTION_FOLDER)
+                # Check for errors or success based on command output
+                if result == 1:
+                    return jsonify({'message': 'Runs were succesful. Results are ready.'})
+                else:
+                    return jsonify({'error': 'Runs were succesful. Error processing the results.'})
+            else:
+                return jsonify({'message': 'Error handling all/part of your CIFs'})    
+        elif result == 2:
+            return jsonify({'message': 'No CIF to work with'})
         else:
-            return jsonify({'error': 'Error submitting job'})
+            return jsonify({'message': 'Error submitting job'})
     
     except Exception as e:
         return jsonify({'error': 'Exception occurred', 'details': str(e)})
     
     finally:
-        # Change back to the original working directory
         os.chdir(original_folder)
     
 
-@app.route('/fetch-results', methods=['GET'])
-def fetch_results():
-    result = utils.export_results(EXECUTION_FOLDER)
-    # Check for errors or success based on command output
-    if result == 1:
-        return jsonify({'message': 'Results fetched succesfully'})
-    else:
-        return jsonify({'error': 'Results were not fetched'})
+@app.route('/show-csv')
+def show_csv():
 
-@app.route('/read-csv')
-def read_csv():
-    print("Current directory:", os.getcwd())
-    file_path = os.path.join(os.getcwd(), '../random_user_dion/Synth_folder', 'synth_results.csv')
+    file_path = os.path.join(EXECUTION_FOLDER, 'Synth_folder', 'synth_results.csv')
 
     try:
         if os.path.exists(file_path):
             df = pd.read_csv(file_path)
             table_html = df.to_html(classes='table table-striped table-bordered table-hover', index=False)
             session['table_html'] = table_html
+            
             return jsonify({'table': table_html})
         else:
             return jsonify({'error': 'File not found'}), 404
@@ -152,21 +195,9 @@ def download_csv():
 
     return send_file(csv_file_path, as_attachment=True)
 
-
-# @app.route('/read-file', methods=['GET'])
-# def read_file():
-#     # Define the file path
-#     file_path = os.path.join(os.getcwd(), '../random_user_dion/Synth_folder', 'synth_results.txt')
-    
-#     # Check if the file exists
-#     if os.path.exists(file_path):
-#         with open(file_path, 'r') as file:
-#             file_contents = file.read()
-#         return jsonify({'file_contents': file_contents})
-#     else:
-#         return jsonify({'error': 'File not found'}), 404
-
-
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('error.html'), 404
 
 
     

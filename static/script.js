@@ -27,6 +27,7 @@ function uploadFiles() {
         formData.append('file', fileInput.files[i]);
     }
 
+
     $.ajax({
         url: '/upload',
         type: 'POST',
@@ -44,8 +45,8 @@ function uploadFiles() {
             // Handle error response as needed
         }
     });
-}
 
+}
 
 
 
@@ -54,14 +55,17 @@ function submitJob() {
     var formData = new FormData(form);
     var selectedOption = formData.get('option');
 
+    document.getElementById('loader').style.display = 'block'; // Show loader
     $.ajax({
         url: '/submit-job',
         method: 'POST',
         data: { option: selectedOption },
         success: function(response) {
+            document.getElementById('loader').style.display = 'none'; // Hide loader
             document.getElementById('jobStatus').innerText = response.message;
         },
         error: function(error) {
+            document.getElementById('loader').style.display = 'none'; // Hide loader
             document.getElementById('jobStatus').innerText = 'An error occurred while submitting the job.';
         }
     });
@@ -71,24 +75,28 @@ function submitJob() {
 function fetchResults(){
     console.log("Fetching results...");
     
+    document.getElementById('loader').style.display = 'block'; // Show loader
+
     $.ajax({
         url: '/fetch-results',
         method: 'GET',
         success: function(response) {
+            document.getElementById('loader').style.display = 'none'; // Hide loader
             document.getElementById('results').innerText = response.message;
         },
         error: function(error) {
+            document.getElementById('loader').style.display = 'none'; // Hide loader
             document.getElementById('results').innerText = 'An error occurred';
         }
     });
 }
 
 
-function readCSV() {
+function showCSV() {
     console.log("Reading file...");
 
     $.ajax({
-        url: '/read-csv',
+        url: '/show-csv',
         method: 'GET',
         success: function(response) {
             if (response.table) {

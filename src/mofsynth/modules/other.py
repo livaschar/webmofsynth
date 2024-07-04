@@ -5,6 +5,7 @@ import openpyxl
 import numpy as np
 import csv
 
+
 def load_objects(path):
     
     id_smiles_dict = {}
@@ -74,7 +75,6 @@ def write_txt_results(results_list, results_txt_path):
             # if np.isnan(j for j in i):
             #     f.write(f"{i[0]:<50} {i[1]:<37} {i[2]:<37} {i[3]:<30} {i[4]:<10} {i[5]:<60} {i[6]:<30} {i[7]:<30} {i[8]:<10}\n") 
             # else:
-            i[1] = np.NaN
             f.write(f"{i[0]:<50} {i[1]:<37.3f} {i[2]:<37.3f} {i[3]:<30.3f} {i[4]:<10} {i[5]:<60} {i[6]:<30.3f} {i[7]:<30.3f} {i[8]:<10}\n")
 
 def write_xlsx_results(results_list, results_xlsx_path):
@@ -84,19 +84,24 @@ def write_xlsx_results(results_list, results_xlsx_path):
     sheet = workbook.active
 
     # Write headers
-    headers = ["NAME", "ENERGY_(OPT-SP)_[au]", "ENERGY_(OPT-SP)_[kcal/mol]", "RMSD_[A]", "LINKER_(CODE)", "LINKER_(SMILES)", "Linker_SinglePointEnergy_[au]", "Linker_OptEnergy_[au]", "Opt_status"]
+    # headers = ["NAME", "ENERGY_(OPT-SP)_[au]", "ENERGY_(OPT-SP)_[kcal/mol]", "RMSD_[A]", "LINKER_(CODE)", "LINKER_(SMILES)", "Linker_SinglePointEnergy_[au]", "Linker_OptEnergy_[au]", "Opt_status"]
+    headers = ["NAME", "ENERGY_(OPT-SP)_[kcal/mol]", "RMSD_[A]", "LINKER_(SMILES)", "Linker_SinglePointEnergy_[au]", "Linker_OptEnergy_[au]", "Opt_status"]
     sheet.append(headers)
 
     # Write results
     for result_row in results_list:
-        sheet.append(result_row)
+        row_data = [result_row[0], result_row[2], result_row[3], result_row[5], result_row[6], result_row[7], result_row[8]]
+        sheet.append(row_data)
+        # sheet.append(result_row)
 
     # Save the workbook to the specified Excel file
     workbook.save(results_xlsx_path)
 
 def write_csv_results(results_list, results_csv_path):
-    # Define headers
-    headers = ["NAME", "ENERGY_(OPT-SP)_[au]", "ENERGY_(OPT-SP)_[kcal/mol]", "RMSD_[A]", "LINKER_(CODE)", "LINKER_(SMILES)", "Linker_SinglePointEnergy_[au]", "Linker_OptEnergy_[au]", "Opt_status"]
+    
+    headers = ["MOF", "Energy (kcal/mol)", "RMSD (A)", "Smiles", "Single Point Energy (au)", "Optimized Energy (au)", "Status"]    
+    
+    sorted_results = sorted(results_list, key=lambda x: -float(x[2]))
     
     # Open the CSV file for writing
     with open(results_csv_path, mode='w', newline='') as file:
@@ -106,8 +111,20 @@ def write_csv_results(results_list, results_csv_path):
         writer.writerow(headers)
         
         # Write results
-        for result_row in results_list:
-            writer.writerow(result_row)
+        for result_row in sorted_results:
+            if float(result_row[2]) > 10.0:
+                continue 
+            row_data = [result_row[0], result_row[2], result_row[3], result_row[5], result_row[6], result_row[7], result_row[8]]
+            writer.writerow(row_data)
+            # writer.writerow(result_row)
+
+def print_energy_ranking(results_list):
+    # Sort results_list based on the energy value (result_row[2])
+    sorted_results = sorted(results_list, key=lambda x: float(x[2]))  # Assuming result_row[2] is the energy value
+
+    # Print or process the sorted results
+    for rank, result_row in enumerate(sorted_results, start=1):
+        print(f"Rank {rank}: {result_row[0]} - Energy: {result_row[2]} kcal/mol")
 
 
 def delete_files_except(folder_path, exceptions):

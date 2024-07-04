@@ -1,13 +1,54 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Error</title>
-    <link rel="stylesheet" href="static/style.css">
+    <title>Page Not Found</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+        }
+        h1 {
+            font-size: 3em;
+            margin: 0.5em 0;
+        }
+        p {
+            font-size: 1.2em;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .illustration {
+            max-width: 100%;
+            height: auto;
+            margin: 2em 0;
+        }
+    </style>
 </head>
 <body>
-    <h2>Error</h2>
-    <div id="error">{{ error }}</div>
+    <div class="container">
+        <h1>404</h1>
+        <p>Oops! The page you are looking for does not exist.</p>
+        <img src="{{ url_for('static', filename='images/404.png') }}" alt="Page Not Found" class="illustration">
+        <p>Return to the <a href="{{ url_for('index') }}">homepage</a> or use the navigation above to find what you're looking for.</p>
+        <h2>Error</h2>
+        <div id="error">{{ error }}</div>
+    </div>
 </body>
 </html>

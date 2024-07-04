@@ -22,7 +22,7 @@ from . modules.mof import MOF
 from . modules.linkers import Linkers
 from . modules.other import (copy, settings_from_file,
                              user_settings, load_objects,
-                             write_txt_results, write_xlsx_results, write_csv_results)
+                             write_txt_results, write_xlsx_results, write_csv_results,print_energy_ranking)
 
 def main(directory, function, supercell_limit):
     r"""
@@ -77,16 +77,13 @@ def main_run(directory, supercell_limit, EXECUTION_FOLDER):
         A tuple containing instances of MOF and Linkers classes, and lists of MOFs with
         faults in supercell creation and fragmentation procedures.
     """
-    print('main_run: ', os.getcwd())
 
     # Create the working directory
     os.makedirs("Synth_folder", exist_ok=True)
 
     # If settings file exists, read settings from there else ask for user input
     Linkers.settings_path = os.path.join(EXECUTION_FOLDER, 'input_data/settings.txt')
-    print("Linkers.settings_path edit: ", Linkers.settings_path)
     Linkers.job_sh_path = os.path.join(EXECUTION_FOLDER, 'input_data')
-    print("Linkers.job_sh_path edit: ", Linkers.job_sh_path)
     MOF.src_dir = EXECUTION_FOLDER
 
     if os.path.exists(Linkers.settings_path):
@@ -102,11 +99,10 @@ def main_run(directory, supercell_limit, EXECUTION_FOLDER):
     # A list of cifs from the user soecified directory
     user_dir = os.path.join(f"./{directory}")
     cifs = [item for item in os.listdir(user_dir) if item.endswith(".cif")]
-    
 
     if cifs == []:
         print(f"\nWARNING: No cif was found in: {user_dir}. Please check run.py\n")
-        return 0
+        return 2
 
     # Start procedure for each cif
     for _, cif in enumerate(cifs):
@@ -143,44 +139,14 @@ def main_run(directory, supercell_limit, EXECUTION_FOLDER):
             MOF.fault_fragment.append(mof.name)
             MOF.instances.pop()
 
-            ''' SKIP FOR NOW '''
-            '''
-            question = input(f'Do you want to skip {mof.name}? [y/n]: ')
-            if question.lower() == 'y':
-                MOF.fault_fragment.append(mof.name)
-                MOF.instances.pop()
-                continue
-            else:
-                print(f'Please manually put linkers.cif at this path
-                {os.path.join(mof.fragmentation_path,"Output/MetalOxo")}. When ready please...')
-                input('Press Enter to continue')
-                mof.fragmentation(rerun = True)
-            '''
-            ''' ------------ '''
-
-            ''' SKIP FOR NOW '''
-            '''
-            question = input(f'Do you want to skip {mof.name}? [y/n]: ')
-            if question.lower() == 'y':
-                MOF.fault_smiles.append(mof.name)
-                MOF.instances.pop()
-                continue
-            else:
-                print(f'Please manually write smiles code at
-                {os.path.join(mof.fragmentation_path,"Output/python_smiles_parts.txt")}.
-                When ready please...')
-                input('Press Enter to continue')
-            '''
-            ''' ------------ '''
-
     # Find the unique linkers from the whole set of MOFs
-    smiles_id_dict = MOF.find_unique_linkers()
-
+    smiles_id_dict = MOF.find_unique_linkers(EXECUTION_FOLDER)
+    
     # Proceed to the optimization procedure of every linker
     for linker in Linkers.instances:
         print(f'\n - \033[1;34mLinker under optimization study: {linker.smiles_code}, of {linker.mof_name}\033[m -')
         linker.optimize(rerun = False)
-
+    
     # Right instances of MOF class
     with open('cifs.pkl', 'wb') as file:
         pickle.dump(MOF.instances, file)
@@ -188,12 +154,12 @@ def main_run(directory, supercell_limit, EXECUTION_FOLDER):
     # Right instances of Linkers class
     with open('linkers.pkl', 'wb') as file:
         pickle.dump(Linkers.instances, file)
-
+    
     if MOF.fault_fragment != []:
         with open('fault_fragmentation.txt', 'w') as file:
             for mof_name in MOF.fault_fragment:
                 file.write(f'{mof_name}\n')
-
+    
     if MOF.fault_smiles != []:
         with open('fault_smiles.txt', 'w') as file:
             for mof_name in MOF.fault_smiles:
@@ -202,7 +168,7 @@ def main_run(directory, supercell_limit, EXECUTION_FOLDER):
     with open('smiles_id_dictionary.txt', 'w') as file:
         for key, value in smiles_id_dict.items():
             file.write(f'{key} : {value}\n')
-    
+
     return 1
     return MOF.instances, Linkers.instances, MOF.fault_fragment, MOF.fault_smiles
 
@@ -216,10 +182,9 @@ def check_opt(EXECUTION_FOLDER, len_files):
         A tuple containing lists of converged and not converged linker instances.
     """
     Linkers.settings_path = os.path.join(EXECUTION_FOLDER, 'input_data/settings.txt')
-    print("Linkers.settings_path edit: ", Linkers.settings_path)
     Linkers.job_sh_path = os.path.join(EXECUTION_FOLDER, 'input_data')
-    print("Linkers.job_sh_path edit: ", Linkers.job_sh_path)
     MOF.src_dir = EXECUTION_FOLDER
+    
 
     os.chdir(EXECUTION_FOLDER)
     
@@ -235,10 +200,10 @@ def check_opt(EXECUTION_FOLDER, len_files):
         for instance in not_converged:
             f.write(f"{instance.smiles_code} {instance.mof_name}\n")
     
-    if len(Linkers.converged) == len_files:
-        return 1
+    if len(converged) + len(not_converged) == len_files:
+        return True
     else:
-        return 0
+        return False
    
 def export_results(EXECUTION_FOLDER):
     r"""
@@ -250,10 +215,9 @@ def export_results(EXECUTION_FOLDER):
         A tuple containing file paths for the generated text and Excel result files.
     """
     from . modules.other import load_objects
+    
     Linkers.settings_path = os.path.join(EXECUTION_FOLDER, 'input_data/settings.txt')
-    print("Linkers.settings_path edit: ", Linkers.settings_path)
     Linkers.job_sh_path = os.path.join(EXECUTION_FOLDER, 'input_data')
-    print("Linkers.job_sh_path edit: ", Linkers.job_sh_path)
     MOF.src_dir = EXECUTION_FOLDER
 
     os.chdir(EXECUTION_FOLDER)
@@ -276,17 +240,12 @@ def export_results(EXECUTION_FOLDER):
     best_opt_energy_dict = Linkers.define_best_opt_energy()
 
     results_list = MOF.analyse(cifs, linkers, best_opt_energy_dict, id_smiles_dict)
-    
-    for material in results_list:
-        print(material[0], material[1], material[3])
-    
-    for instance in MOF.instances:
-        print(instance.name, instance.de, instance.rmsd)
-
 
     txt_path = os.path.join(EXECUTION_FOLDER, MOF.results_txt_path)
     write_txt_results(results_list, txt_path)
     write_csv_results(results_list, os.path.join(EXECUTION_FOLDER, MOF.results_csv_path))
+    print_energy_ranking(results_list)
+    
     return 1
 
     return MOF.results_txt_path, MOF.results_xlsx_path
