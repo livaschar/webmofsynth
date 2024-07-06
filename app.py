@@ -185,13 +185,16 @@ def print_results():
 @app.route('/download-csv')
 def download_csv():
     csv_file_path = os.path.join(EXECUTION_FOLDER, 'Synth_folder/synth_results.csv')
-    print('Ok: ', csv_file_path)
     
-    # Ensure the file exists
-    if not os.path.exists(csv_file_path):
-        return jsonify({'error': 'File not found'}), 404
-
-    return send_file(csv_file_path, as_attachment=True)
+    try:
+        # Ensure the file exists
+        if os.path.exists(csv_file_path):
+            return send_file(csv_file_path, as_attachment=True)
+        else:
+            return jsonify({'error': 'File not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
 
 @app.errorhandler(404)
 def page_not_found(error):
@@ -203,4 +206,3 @@ def page_not_found(error):
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
     # app.run(debug=False)
-

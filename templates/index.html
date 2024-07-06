@@ -21,7 +21,10 @@
 
     <h2>A Computational tool toward synthetic likelihood predictions of MOFs</h2>
     <p>Provided by Materials Modeling & Design group of the University of Crete</p>
-        
+
+
+
+
     <div class="file-upload-container">
         <h3>1. Please insert your file</h3>
         <form id="uploadForm" enctype="multipart/form-data">
@@ -41,14 +44,14 @@
             <input type="radio" id="optionNone" name="option" value="none">
             <label for="optionNone">Nan</label><br>
             <input type="radio" id="option5" name="option" value="5">
-            <label for="option5">5</label><br>
+            <label for="option5">>5</label><br>
             <input type="radio" id="option10" name="option" value="10">
-            <label for="option10">10</label><br>
+            <label for="option10">>10</label><br>
             <input type="radio" id="option15" name="option" value="15">
-            <label for="option15">15</label><br>
+            <label for="option15">>15</label><br>
             <input type="radio" id="option20" name="option" value="20">
-            <label for="option20">20</label><br>
-            <button type="button" onclick="submitJob()">Start Synthesizability evaluation</button>
+            <label for="option20">>20</label><br>
+            <button type="button" onclick="submitJob()">Start Evaluation</button>
         </form>
     </div>
     
@@ -65,15 +68,22 @@
         <button type="button" onclick="downloadButton()">Download CSV</button>
     </div>
     
-    <div class="progress-container">
+    <!-- <div class="progress-container">
         <h3>Progress bar</h3>
         <div class="progress-bar">
             <div class="progress-bar-fill"></div>
         </div>
-    </div>
+    </div> -->
     
     <!-- <button type="button" onclick="fetchResults()">fetchResults</button> -->
-
+    
+    <div class="github-link-container">
+        <a href="https://github.com/your-repo-url" target="_blank" class="github-link">
+            <!-- <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub Logo" class="github-logo"> -->
+            <img src="static/images/GitHub_Symbol.png" alt="GitHub Logo" class="github-logo">
+            Visit our GitHub Repo
+        </a>
+    </div>
 
     
 </body>
