@@ -10,12 +10,15 @@
 body {
     font-family: Arial, sans-serif;
     text-align: center;
-    margin-top: 50px;
+    margin-top: 30px;
+    margin-bottom: 8px;
+    margin-right: 8px;
+    margin-left: 8px;
     background-image: url('images/backgrounds/background_image_2.png');
     background-size: cover;
     background-repeat: no-repeat;
-    background-attachment: scroll;
-    /* background-attachment: fixed; */
+    /* background-attachment: scroll; */
+    background-attachment: fixed;
     color: #000;
 }
 
@@ -39,12 +42,20 @@ h1, h2, p {
     margin-top: 10px;
     font-size: 2.5em;
 }
+
+
+
+
+
 /* ------------------------------- */
 /* File upload container styles */
 .file-upload-container {
     width: 300px;
     margin: 50px auto;
-    padding: 20px;
+    padding-top: 20px;
+    padding-bottom: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
     border-radius: 10px;
     text-align: center;
     background-color: rgba(86, 126, 138, 0.4);
@@ -64,16 +75,17 @@ h1, h2, p {
 }
 
 .file-upload-container button {
+    font-size: 1em;
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
-    background-color: #000;
+    background-color: #0e4597;
     color: #fff;
     cursor: pointer;
 }
 
 .file-upload-container button:hover {
-    background-color: #218838;
+    background-color: #0b326e;
 }
 
 .file-upload-container #fileList {
@@ -82,10 +94,15 @@ h1, h2, p {
 }
 
 .file-upload-container #fileList p {
-    margin: 5px 0;
+    /* margin: 5px 0; */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.file-upload-container #uploadStatus {
+    margin-top: 10px; /* Add margin-top to create space */
+    margin-bottom: 5px; /* Add margin-top to create space */
 }
 /* ------------------------------- */
 /* ------------------------------- */
@@ -105,25 +122,29 @@ h1, h2, p {
 
 .options-container h3 {
     text-align: center;
+    margin-bottom: 10px; 
 }
 
-.options-container .options {
-    margin-bottom: 20px; /* Space between options and button */
-}
+/* .options-container .options {
+    margin-top: 50px; /* Space between options and button */
+    /* margin-bottom: 50px; Space between options and button
+} */
 
 .options-container button {
+    font-size: 1em;
     display: block; /* Make button a block element */
     margin: 0 auto; /* Center button horizontally */
+    margin-top: 10px;
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
-    background-color: #000;
+    background-color: #0e4597;
     color: #fff;
     cursor: pointer;
 }
 
 .options-container button:hover {
-    background-color: #218838;
+    background-color: #0b326e;
 }
 
 .options-container input[type="radio"] {
@@ -235,25 +256,72 @@ h1, h2, p {
 /* ------------------------------- */
 /* Buttons container styles */
 .button-container {
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin-top: 20px;
 }
 .button-container button {
-    background-color: #007bff;
+    flex: 1;  /* Make buttons take equal space */
+    max-width: 135px;  /* Set a maximum width if needed */
+    background-color: #0c8674;
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 10px;
     cursor: pointer;
     border-radius: 5px;
     font-size: 1em;
     margin: 0 10px;
 }
 .button-container button:hover {
-    background-color: #0056b3;
+    background-color: #096053;
 }
 /* ------------------------------- */
 /* ------------------------------- */
 
+
+
+
+
+/* ------------------------------- */
+/* Github link */
+.github-link-container {
+    margin-top: 20px;
+    /* margin-bottom: 10px;
+    margin-right: 0px;
+    margin-left: 0px; */
+    text-align: center;
+}
+
+.github-link {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 20px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    background-color: #24292e;
+    color: #ffffff;
+    /* background-color: #e3eaec; */
+    /* color: #1d1c1c; */
+    text-decoration: none;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.github-link:hover {
+    background-color: #909193;
+    /* background-color: #e3eaec; */
+    animation: infinite;
+}
+
+.github-logo {
+    width: 44px;
+    height: 24px;
+    /* margin-right: 8px; */
+}
+
+/* ------------------------------- */
+/* ------------------------------- */
 
 
 
