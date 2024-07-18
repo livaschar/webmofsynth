@@ -14,40 +14,37 @@ body {
     margin-bottom: 1%;
     margin-right: 1%;
     margin-left: 1%;
-    /* background-image: url('images/backgrounds/background_image_2.png'); */
-    background-image: url('images/backgrounds/quantumcomputing.png');
+    background-image: url('images/backgrounds/background_image_2.png');
+    
     background-size:cover;
     background-repeat: no-repeat;
+    /* background-attachment: scroll; */
     background-attachment:fixed;
+    color: #000;
+}
+
+/* Headings and paragraphs */
+h1, h2, p {
+    color: #000;
 }
 
 /* Header styles */
 .header {
     width: 100%;
-    /* height: 7em; */
-    /* background-image: url('images/logo/final_black_1-removebg-preview.png'); */
-    /* background-size: contain;
+    height: 7em;
+    background-image: url('images/logo/final_black_1-removebg-preview.png');
+    background-size: contain;
     background-repeat: no-repeat;
-    background-position: center; */
+    background-position: center;
     text-align: center;
     color: #fff;
-    margin-top: 1%;
-    margin-bottom: 50px;
-}
-.header img {   
-    max-width: 15%;
 }
 .header h1 {
-    font-size: 1.5em;
-    margin-top: 1%;
-    color: #ea760b;
+    margin-top: 10px;
+    font-size: 2.5em;
 }
-.header p {
-    font-size: 0.9em;
-    margin-top: 1%;
-    margin-bottom: 20px;
-    color: #8a8987;
-}
+
+
 
 
 
@@ -56,11 +53,6 @@ body {
 .file-upload-container {
     width: 300px;
     margin: 50px auto;
-
-    /* display: flex;
-    justify-content: center;
-    align-items: center; */
-
     padding-top: 20px;
     padding-bottom: 10px;
     padding-left: 20px;
@@ -68,7 +60,6 @@ body {
     border-radius: 10px;
     text-align: center;
     background-color: rgba(86, 126, 138, 0.4);
-    color: #ebebeb;
 }
 
 .file-upload-container input[type="file"] {
@@ -79,8 +70,7 @@ body {
     display: block;
     margin: 20px 0;
     padding: 7px;
-    background-color: #8a8987;
-    color: #ffffff;
+    background-color: #f2f2f2;
     border-radius: 5px;
     cursor: pointer;
 }
@@ -121,6 +111,7 @@ body {
 
 /* ------------------------------- */
 /* Options container styles */
+
 .options-container {
     width: 300px;
     margin: 20px auto;
@@ -128,13 +119,11 @@ body {
     border-radius: 10px;
     background-color: rgba(86, 126, 138, 0.4);
     text-align: left; /* Align text and options to the left */
-    color: #ebebeb;
 }
 
 .options-container h3 {
     text-align: center;
     margin-bottom: 10px; 
-    color: #ebebeb;
 }
 
 /* .options-container .options {
@@ -315,8 +304,7 @@ body {
     margin-top: 20px;
     padding: 10px 20px;
     border-radius: 5px;
-    /* background-color: #24292e; */
-    background-color: rgba(86, 126, 138, 0.7);
+    background-color: #24292e;
     color: #ffffff;
     /* background-color: #e3eaec; */
     /* color: #1d1c1c; */
@@ -341,19 +329,6 @@ body {
 /* ------------------------------- */
 
 
-/* ------------------------------- */
-/* Github link */
-.footer {
-    margin-top: 20px;
-    color: #cac7c8;
-    font-size: 0.7em;
-    text-align: center;
-    position: relative; /* Optional: Position relative to adjust the layout */
-    bottom: 0; /* Optional: Position at the bottom */
-    width: 100%; /* Make the footer full width */
-}
-/* ------------------------------- */
-/* ------------------------------- */
 
 
 

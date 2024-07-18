@@ -5,25 +5,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>Test with online tools</title>
-    <link rel="shortcut icon" href="#">
+    <title>MOFSynth</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico">
     <link rel="stylesheet" href="static/style.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="static/script.js"></script>
-    
+
 </head>
 
 
 <body>
     <div class="header">
-        <h1></h1>
+        <!-- <img src="static/images/logo/final_black_1-removebg-preview.png" alt="Logo"> -->
+        <img src="static/images/logo/MOF_background.png" alt="Logo">
+        <h1>A Computational tool toward synthetic likelihood predictions of MOFs</h1>
+        <p>Provided by Materials Modeling & Design group of the University of Crete</p>
     </div>
-
-    <h2>A Computational tool toward synthetic likelihood predictions of MOFs</h2>
-    <p>Provided by Materials Modeling & Design group of the University of Crete</p>
-
-
-
 
     <div class="file-upload-container">
         <h3>1. Please insert your file</h3>
@@ -51,7 +48,7 @@
             <label for="option15">>15</label><br>
             <input type="radio" id="option20" name="option" value="20">
             <label for="option20">>20</label><br>
-            <button type="button" onclick="submitJob()">Start Evaluation</button>
+            <button type="button" id='submitButton' onclick="submitJob()">Start Evaluation</button>
         </form>
     </div>
     
@@ -84,6 +81,12 @@
             Visit our GitHub Repo
         </a>
     </div>
+
+    <footer class="footer">
+        <p>Cite this work DOI<br>
+        ©2024 Materials Modelling and Design Group.  GNU General Public License v3.0 only.
+        </p>
+    </footer>
 
     
 </body>

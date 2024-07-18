@@ -56,6 +56,8 @@ function submitJob() {
     var selectedOption = formData.get('option');
 
     document.getElementById('loader').style.display = 'block'; // Show loader
+    document.getElementById('submitButton').disabled = true;
+
     $.ajax({
         url: '/submit-job',
         method: 'POST',
@@ -63,8 +65,10 @@ function submitJob() {
         success: function(response) {
             document.getElementById('loader').style.display = 'none'; // Hide loader
             document.getElementById('jobStatus').innerText = response.message;
+            document.getElementById('submitButton').disabled = false;
         },
         error: function(error) {
+            document.getElementById('submitButton').disabled = false;
             document.getElementById('loader').style.display = 'none'; // Hide loader
             document.getElementById('jobStatus').innerText = 'An error occurred while submitting the job.';
         }
