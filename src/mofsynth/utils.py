@@ -192,29 +192,22 @@ def check_opt(EXECUTION_FOLDER, len_files):
 
     converged, not_converged = Linkers.check_optimization_status(linkers)
     
-    with open('converged.txt', 'w') as f:
-        for instance in converged:
-            f.write(f"{instance.smiles_code} {instance.mof_name}\n")
+    # with open('converged.txt', 'w') as f:
+    #     for instance in converged:
+    #         f.write(f"{instance.smiles_code} {instance.mof_name}\n")
         
-    with open('not_converged.txt', 'w') as f:
-        for instance in not_converged:
-            f.write(f"{instance.smiles_code} {instance.mof_name}\n")
+    # with open('not_converged.txt', 'w') as f:
+    #     for instance in not_converged:
+    #         f.write(f"{instance.smiles_code} {instance.mof_name}\n")
     
     if len(converged) + len(not_converged) == len_files:
-        return True
+        return converged, True
     else:
-        return False
+        return [], False
    
-def export_results(EXECUTION_FOLDER):
-    r"""
-    Export the results of the synthesizability evaluation.
-
-    Returns
-    -------
-    Tuple
-        A tuple containing file paths for the generated text and Excel result files.
-    """
+def export_results(EXECUTION_FOLDER, compare = False):
     from . modules.other import load_objects
+    import pandas as pd
     
     Linkers.settings_path = os.path.join(EXECUTION_FOLDER, 'input_data/settings.txt')
     Linkers.job_sh_path = os.path.join(EXECUTION_FOLDER, 'input_data')
@@ -222,15 +215,8 @@ def export_results(EXECUTION_FOLDER):
 
     os.chdir(EXECUTION_FOLDER)
     
-    cifs, linkers, id_smiles_dict= load_objects(EXECUTION_FOLDER)
-    
-    ''' down form here not checked
-    basiccally you have to put the path to every function
-    make sure that it is executed from random user
-
-    print(os.getcwd()) and change if you have to the 'path'
-    '''
-    
+    cifs, linkers, id_smiles_dict = load_objects(EXECUTION_FOLDER)
+   
     Linkers.check_optimization_status(linkers)
 
     for linker in Linkers.converged:
@@ -238,14 +224,53 @@ def export_results(EXECUTION_FOLDER):
 
     # Best opt for each smiles code. {smile code as keys and value [opt energy, opt_path]}
     best_opt_energy_dict = Linkers.define_best_opt_energy()
+    
+    file_path = os.path.join(EXECUTION_FOLDER, 'input_data/databases.xlsx')
+    df = pd.read_excel(file_path)
 
-    results_list = MOF.analyse(cifs, linkers, best_opt_energy_dict, id_smiles_dict)
+    results_list = MOF.analyse(cifs, linkers, best_opt_energy_dict, id_smiles_dict, df)
 
-    txt_path = os.path.join(EXECUTION_FOLDER, MOF.results_txt_path)
-    write_txt_results(results_list, txt_path)
     write_csv_results(results_list, os.path.join(EXECUTION_FOLDER, MOF.results_csv_path))
-    print_energy_ranking(results_list)
     
     return 1
 
-    return MOF.results_txt_path, MOF.results_xlsx_path
+def compare_to_others(EXECUTION_FOLDER, cifs):
+    print('YEAH')
+    import pandas as pd
+    from scipy.stats import percentileofscore
+    
+    # Load the Excel file
+    file_path = os.path.join(EXECUTION_FOLDER, 'input_data/databases.xlsx')
+    df = pd.read_excel(file_path)
+    
+    for mof in cifs:
+        # Create a new DataFrame row
+        example_row = pd.DataFrame({
+           'NAME': [mof.name],
+           'ENERGY_(OPT-SP)_[kcal/mol]': [mof.de*627.51],
+           'RMSD_[A]': [mof.rmsd]
+           })
+        df = pd.concat([df, example_row], ignore_index=True)
+    
+        # Sort by ENERGY_(OPT-SP)_[kcal/mol]
+        df_sorted_energy = df.sort_values(by='ENERGY_(OPT-SP)_[kcal/mol]', ascending=True).reset_index(drop=True)
+        df_sorted_energy['Energy_Rank'] = df_sorted_energy.index + 1
+        
+        # Sort by RMSD_[A]
+        df_sorted_rmsd = df.sort_values(by='RMSD_[A]', ascending=True).reset_index(drop=True)
+        df_sorted_rmsd['RMSD_Rank'] = df_sorted_rmsd.index + 1
+        
+        # Find the rank of the example
+        example_energy_rank = df_sorted_energy[df_sorted_energy['NAME'] == cifs[0].name]['Energy_Rank'].values[0]
+        example_rmsd_rank = df_sorted_rmsd[df_sorted_rmsd['NAME'] == cifs[0].name]['RMSD_Rank'].values[0]
+        
+        # Calculate percentile for energy
+        energy_scores = df['ENERGY_(OPT-SP)_[kcal/mol]']
+        example_energy_percentile = percentileofscore(energy_scores, cifs[0].de*627.51, kind='weak')
+        
+        # Calculate percentile for RMSD
+        rmsd_scores = df['RMSD_[A]']
+        example_rmsd_percentile = percentileofscore(rmsd_scores, cifs[0].rmsd, kind='weak')
+        
+        print(f'\nIt belongs to top {example_energy_percentile} %')
+        print('Rank rmsd:', example_rmsd_percentile)

@@ -99,7 +99,7 @@ def write_xlsx_results(results_list, results_xlsx_path):
 
 def write_csv_results(results_list, results_csv_path):
     
-    headers = ["MOF", "Energy (kcal/mol)", "RMSD (A)", "Smiles", "Single Point Energy (au)", "Optimized Energy (au)", "Status"]    
+    headers = ["Ranking", "Filename", "Energy Percentile Rank (%)", "RMSD Percentile Rank (%)", "Energy (kcal/mol)", "RMSD (A)", "Smiles", "Single Point Energy (au)", "Optimized Energy (au)", "Status"]    
     
     sorted_results = sorted(results_list, key=lambda x: -float(x[2]))
     
@@ -111,10 +111,10 @@ def write_csv_results(results_list, results_csv_path):
         writer.writerow(headers)
         
         # Write results
-        for result_row in sorted_results:
+        for index, result_row in enumerate(sorted_results):
             if float(result_row[2]) > 10.0:
                 continue 
-            row_data = [result_row[0], result_row[2], result_row[3], result_row[5], result_row[6], result_row[7], result_row[8]]
+            row_data = [index+1, result_row[0], result_row[1], result_row[2], result_row[4], result_row[5], result_row[7], result_row[8], result_row[9], result_row[10]]
             writer.writerow(row_data)
             # writer.writerow(result_row)
 

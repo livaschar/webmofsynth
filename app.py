@@ -127,26 +127,47 @@ def submit_job():
         # Execute the command and capture output
         result = utils.main_run('uploads', option, EXECUTION_FOLDER)
 
-        # Check for errors or success based on command output
+        # utils.main_run was succesful
         if result == 1:
+            print('Result = 1' )
+            
+            # check which of the runs have finished and which not 
             counter = 0
             finished = False
             while not finished and counter < 10 :
-                finished = utils.check_opt(EXECUTION_FOLDER, session.get('file_count', 0))
+                converged, finished = utils.check_opt(EXECUTION_FOLDER, session.get('file_count', 0))
                 time.sleep(5)
                 counter += 1
             
-            if finished:
-                result = utils.export_results(EXECUTION_FOLDER)
+
+            # if all runs have finished
+            if finished and converged != []:
+                
+                if session.get('file_count', 0) == 1:
+                    print('Entered true mode')
+                    result = utils.export_results(EXECUTION_FOLDER, compare = True)
+                else:
+                    result = utils.export_results(EXECUTION_FOLDER, compare = False)
+                
                 # Check for errors or success based on command output
                 if result == 1:
+                    # return jsonify({'message': 'Runs were succesful. Results are ready.'})
                     return jsonify({'message': 'Runs were succesful. Results are ready.'})
                 else:
                     return jsonify({'error': 'Runs were succesful. Error processing the results.'})
+            
+            elif finished and converged == []:
+                return jsonify({'message': 'No run was converged succesfully'})
+            
+            # if some runs have not finished
             else:
                 return jsonify({'message': 'Error handling all/part of your CIFs'})    
+        
+        # No CIF was found
         elif result == 2:
             return jsonify({'message': 'No CIF to work with'})
+        
+        # An error occured in utils.main_run
         else:
             return jsonify({'message': 'Error submitting job'})
     

@@ -207,12 +207,6 @@ class Linkers:
             elif os.path.exists(os.path.join(linker.opt_path, 'not.uffconverged')):
                 cls.not_converged.append(linker)
             
-            elif os.path.exists(os.path.join(linker.opt_path, 'not.uffconverged')) == False and os.path.exists(os.path.join(linker.opt_path, 'energy')):
-                cls.not_converged.append(linker)
-        
-            else:
-                cls.not_converged.append(linker)
-
         return cls.converged, cls.not_converged
     
     def read_linker_opt_energies(self):   

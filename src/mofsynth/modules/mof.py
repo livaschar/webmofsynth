@@ -476,7 +476,7 @@ class MOF:
     #         Linkers.change_smiles(new_smiles)
 
     @staticmethod
-    def analyse(cifs, linkers, best_opt_energy_dict, id_smiles_dict):
+    def analyse(cifs, linkers, best_opt_energy_dict, id_smiles_dict, df):
         r"""
         Analyze MOF instances based on calculated energies and linkers information.
 
@@ -501,6 +501,9 @@ class MOF:
         This static method performs analysis on MOF instances, calculating binding energies,
         RMSD values, and storing the results in a list.
         """
+        import pandas as pd
+        from scipy.stats import percentileofscore
+
         results_list = []
 
         for mof in cifs:
@@ -518,10 +521,39 @@ class MOF:
                 mof.opt_status = linker.opt_status
                 mof.calc_de(best_opt_energy_dict)
                 mof.calc_rmsd(best_opt_energy_dict)
-
             
-            results_list.append([mof.name, round(mof.de, 1), round(mof.de * 627.51, 1), round(mof.rmsd, 2), mof.linker_smiles, id_smiles_dict[mof.linker_smiles], round(mof.sp_energy, 4), round(mof.opt_energy, 4), mof.opt_status])
-        
+                # Create a new DataFrame row
+                row = pd.DataFrame({
+                    'NAME': [mof.name],
+                    'ENERGY_(OPT-SP)_[kcal/mol]': [mof.de*627.51],
+                    'RMSD_[A]': [mof.rmsd]
+                    })
+    
+                df = pd.concat([df, row], ignore_index=True)
+    
+                # Sort by ENERGY_(OPT-SP)_[kcal/mol]
+                df_sorted_energy = df.sort_values(by='ENERGY_(OPT-SP)_[kcal/mol]', ascending=True).reset_index(drop=True)
+                df_sorted_energy['Energy_Rank'] = df_sorted_energy.index + 1
+    
+                # Sort by RMSD_[A]
+                df_sorted_rmsd = df.sort_values(by='RMSD_[A]', ascending=True).reset_index(drop=True)
+                df_sorted_rmsd['RMSD_Rank'] = df_sorted_rmsd.index + 1
+                
+                # Find the rank of the example
+                energy_rank = df_sorted_energy[df_sorted_energy['NAME'] == mof.name]['Energy_Rank'].values[0]
+                rmsd_rank = df_sorted_rmsd[df_sorted_rmsd['NAME'] == mof.name]['RMSD_Rank'].values[0]
+                
+                # Calculate percentile for energy
+                energy_scores = df['ENERGY_(OPT-SP)_[kcal/mol]']
+                energy_percentile = percentileofscore(energy_scores, mof.de*627.51, kind='weak')
+                
+                # Calculate percentile for RMSD
+                rmsd_scores = df['RMSD_[A]']
+                rmsd_percentile = percentileofscore(rmsd_scores, mof.rmsd, kind='weak')
+
+                results_list.append([mof.name, round(100-energy_percentile, 1), round(rmsd_percentile, 1), round(mof.de, 1), round(mof.de * 627.51, 1), round(mof.rmsd, 2), mof.linker_smiles, id_smiles_dict[mof.linker_smiles], round(mof.sp_energy, 4), round(mof.opt_energy, 4), mof.opt_status])
+            else:
+                continue
         return results_list
     
     def calc_de(self, best_opt_energy_dict):
