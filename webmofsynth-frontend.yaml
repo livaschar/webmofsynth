@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webmofsynth-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: webmofsynth-frontend
+  template:
+    metadata:
+      labels:
+        app: webmofsynth-frontend
+    spec:
+      containers:
+      - name: webmofsynth-frontend
+        image: lefterisv/webmofsynth-frontend:latest
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webmofsynth-frontend-service
+spec:
+  selector:
+    app: webmofsynth-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+  type: ClusterIP
+
