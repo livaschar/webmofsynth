@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: webmofsynth-frontend
-        image: lefterisv/webmofsynth-frontend:1.3
+        image: lefterisv/webmofsynth-frontend:1.8
         ports:
         - containerPort: 80
 ---
@@ -34,8 +34,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: webmofsynth-frontend-ingress
-  annotations:
-    traefik.ingress.kubernetes.io/rewrite-target: /$1
 spec:
   rules:
     - host: test-lv.duckdns.org
