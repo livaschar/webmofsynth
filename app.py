@@ -8,6 +8,8 @@ from flask import Flask, jsonify, render_template, request, redirect, url_for, s
 import secrets
 import string
 import shutil
+from pathlib import Path
+
 app = Flask(__name__)
 
 ''' random FOLDER GENERATOR '''
@@ -39,17 +41,50 @@ def create_session_folders(random_str):
     return UPLOAD_FOLDER, EXECUTION_FOLDER
 
 BASE_FOLDER = os.path.expanduser('~/TEST/repos')
-SOURCE_FOLDER = '/home/haris/TEST/repos/webmofsynth/src/mofsynth/input_data'
+SOURCE_FOLDER = os.getcwd() + '/src/mofsynth/input_data'
 original_folder = os.getcwd()
 # Necessary for using sessions
 # app.secret_key = '3224dd25ca82b528ad1c59c082185f2880dc59c9c38cf98528acbedc22e086b0'
 app.secret_key = generate_random_string(20)
-random_str = generate_random_string(10)
-UPLOAD_FOLDER, EXECUTION_FOLDER = create_session_folders(random_str)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['EXECUTION_FOLDER'] = EXECUTION_FOLDER
+
+
+def delete_directory(dir_path):
+    path = Path(dir_path)
+    if path.exists():
+        if path.is_dir():
+            try:
+                shutil.rmtree(path)
+                print(f"Directory '{path}' and all its contents have been removed.")
+            except Exception as e:
+                print(f"Error: {e}")
+        else:
+            print(f"'{path}' is not a directory.")
+    else:
+        print(f"'{path}' does not exist.")
 
 ''' --------------------------- '''
+
+@app.after_request
+def after_request(response):
+    if 'first_visit' not in session and response.status_code == 200:
+        print('First visit')
+        session['first_visit'] = True
+        random_str = generate_random_string(10)
+        UPLOAD_FOLDER, EXECUTION_FOLDER = create_session_folders(random_str)
+        session['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+        session['EXECUTION_FOLDER'] = EXECUTION_FOLDER
+        print("Created", UPLOAD_FOLDER, "for upload and", EXECUTION_FOLDER, "for execution")
+
+    return response
+
+@app.route('/reload', methods=['POST'])
+def page_reload():
+    print('Page reloaded')
+    
+    delete_directory(session['EXECUTION_FOLDER'])
+    session.clear()
+
+    return jsonify({'status': 'success'})
 
 
 # File requirements
@@ -220,10 +255,8 @@ def download_csv():
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template('error.html'), 404
-
-
     
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=8080, debug=False)
     # app.run(debug=False)

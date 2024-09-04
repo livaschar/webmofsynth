@@ -181,3 +181,31 @@ function readFile(){
     });
 }
 
+function notifyServerOfReload() {
+    fetch('/reload', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message: 'Page reloaded' })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Server response:', data);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+window.onload = function() {
+    // Use the modern Performance Navigation API
+    const navigationEntries = performance.getEntriesByType('navigation');
+    if (navigationEntries.length > 0) {
+        const navType = navigationEntries[0].type;
+        if (navType === 'reload') {
+            console.log('Page was reloaded');
+            notifyServerOfReload(); // Notify server of the reload
+        }
+    }
+};
