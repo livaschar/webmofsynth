@@ -112,8 +112,6 @@ def write_csv_results(results_list, results_csv_path):
         
         # Write results
         for index, result_row in enumerate(sorted_results):
-            if float(result_row[2]) > 10.0:
-                continue 
             row_data = [index+1, result_row[0], result_row[1], result_row[2], result_row[4], result_row[5], result_row[7], result_row[8], result_row[9], result_row[10]]
             writer.writerow(row_data)
             # writer.writerow(result_row)

@@ -55,29 +55,28 @@ class Linkers:
         Define the best optimization energy for each SMILES code.
     """
     
-    # Initial parameters that can be changed
-    job_sh = 'job.sh'
-    run_str = 'sbatch job.sh'
-    opt_cycles = 1000
+    # # Initial parameters that can be changed
+    # job_sh = 'job.sh'
+    # run_str = 'sbatch job.sh'
+    # opt_cycles = 1000
     
-    run_str_sp =  "bash -l -c 'module load turbomole/7.02; x2t linker.xyz > coord; uff; t2x -c > final.xyz'"
+    # run_str_sp =  "bash -l -c 'module load turbomole/7.02; x2t linker.xyz > coord; uff; t2x -c > final.xyz'"
     
-    # job_sh_path = os.path.join('/'.join(__file__.split('/')[:-2]),'input_data')
-    # settings_path = os.path.join('/'.join(__file__.split('/')[:-2]),'input_data/settings.txt')
-    settings_path = os.path.join(os.getcwd(),'input_data/settings.txt')
-    job_sh_path = os.path.join(os.getcwd(),'input_data')
-    
-    
-    run_str = ''
-    opt_cycles = ''
-    job_sh = ''
+    # # job_sh_path = os.path.join('/'.join(__file__.split('/')[:-2]),'input_data')
+    # # settings_path = os.path.join('/'.join(__file__.split('/')[:-2]),'input_data/settings.txt')
+    # settings_path = os.path.join(os.getcwd(),'input_data/settings.txt')
+    # job_sh_path = os.path.join(os.getcwd(),'input_data')
 
-    instances = []
-    converged = []
-    not_converged = []
-    best_opt_energy_dict = {}
+    # run_str = ''
+    # opt_cycles = ''
+    # job_sh = ''
 
-    def __init__(self, smiles_code, mof_name):
+    # instances = []
+    # converged = []
+    # not_converged = []
+    # best_opt_energy_dict = {}
+
+    def __init__(self, smiles_code, mof_name, path_to_linkers_directory):
         r"""
         Initialize a Linkers instance.
 
@@ -88,11 +87,10 @@ class Linkers:
         mof_name : str
             Name of the associated MOF.
         """
-        Linkers.instances.append(self)
 
         self.smiles_code = smiles_code
         self.mof_name = mof_name
-        self.opt_path = os.path.join(MOF.path_to_linkers_directory, self.smiles_code, self.mof_name)
+        self.opt_path = os.path.join(path_to_linkers_directory, self.smiles_code, self.mof_name) #!!!!!!!!!
         self.opt_energy = 0
         self.opt_status = 'not_converged'
 
@@ -100,40 +98,27 @@ class Linkers:
             os.makedirs(self.opt_path, exist_ok = True)
         except:
             return None
-    
-    # def change_smiles(self, smiles):
-    #     """
-    #     Change the SMILES code of the linker instance.
+
+    # @classmethod
+    # def opt_settings(cls, run_str, opt_cycles, job_sh = None):
+    #     r"""
+    #     Set optimization settings for all linker instances.
 
     #     Parameters
     #     ----------
-    #     smiles : str
-    #         New SMILES code.
-    #     """        
-    #     self.smiles_code = smiles
-    #     #self.simple_smile = re.sub(re.compile('[^a-zA-Z0-9]'), '', self.smiles_code)
-    #     self.opt_path = os.path.join(MOF.linkers_path, self.simple_smile, self.mof_name)
+    #     run_str : str
+    #         New run string for optimization.
+    #     opt_cycles : int
+    #         New number of optimization cycles.
+    #     job_sh : str, optional
+    #         New job script file name.
+    #     """
+    #     cls.run_str = run_str
+    #     cls.opt_cycles = opt_cycles
+    #     if job_sh != None:
+    #         cls.job_sh = job_sh
 
-    @classmethod
-    def opt_settings(cls, run_str, opt_cycles, job_sh = None):
-        r"""
-        Set optimization settings for all linker instances.
-
-        Parameters
-        ----------
-        run_str : str
-            New run string for optimization.
-        opt_cycles : int
-            New number of optimization cycles.
-        job_sh : str, optional
-            New job script file name.
-        """
-        cls.run_str = run_str
-        cls.opt_cycles = opt_cycles
-        if job_sh != None:
-            cls.job_sh = job_sh
-
-    def optimize(self, rerun = False):
+    def optimize(self, opt_cycles, job_sh_path, job_sh, run_str_sp, run_str, src_dir):
         r"""
         Optimize the linker structure.
 
@@ -151,36 +136,29 @@ class Linkers:
         #     return
         
         # Must be before os.chdir(self.opt_path)
-        if rerun == False:
-            copy(Linkers.job_sh_path, self.opt_path, Linkers.job_sh)
+        copy(job_sh_path, self.opt_path, job_sh)
         
         os.chdir(self.opt_path)
 
-        if rerun == False:
-            try:
-                os.system(Linkers.run_str_sp)
-            except Exception as e:
-                print(f"An error occurred while running the command for turbomole: {str(e)}")
+        try:
+            os.system(run_str_sp)
+        except Exception as e:
+            print(f"An error occurred while running the command for turbomole: {str(e)}")
         
-        # MIGHT DELETE
-        if rerun == True:
-            os.rename(f'linker.xyz', 'linker_original.xyz')
-            os.rename(f'final.xyz', 'linker.xyz')
-
         with open("control", 'r') as f:
             lines = f.readlines()
         words = lines[2].split()
-        words[0] = str(self.opt_cycles)
+        words[0] = str(opt_cycles)
         lines[2] = ' '.join(words) +'\n'
         with open("control",'w') as f:
             f.writelines(lines)
 
         try:
-            os.system(Linkers.run_str)
+            os.system(run_str)
         except Exception as e:
             print(f"An error occurred while running the command for turbomole: {str(e)}")
         
-        os.chdir(MOF.src_dir)
+        os.chdir(src_dir)
 
     @classmethod
     def check_optimization_status(cls, linkers_list):
@@ -197,17 +175,19 @@ class Linkers:
         Tuple
             A tuple containing lists of converged and not converged linker instances.
         """
+        converged = []
+        not_converged = []
 
         for linker in linkers_list:
             
             if os.path.exists(os.path.join(linker.opt_path, 'uffconverged')):
-                cls.converged.append(linker)
+                converged.append(linker)
                 linker.opt_status = 'converged'
         
             elif os.path.exists(os.path.join(linker.opt_path, 'not.uffconverged')):
-                cls.not_converged.append(linker)
+                not_converged.append(linker)
             
-        return cls.converged, cls.not_converged
+        return converged, not_converged
     
     def read_linker_opt_energies(self):   
         r"""
@@ -220,16 +200,16 @@ class Linkers:
 
         return self.opt_energy
 
-    
-    @classmethod
-    def define_best_opt_energy(cls):
+    def define_best_opt_energy(converged):
+        best_opt_energy_dict = {}
 
-        for instance in Linkers.converged:
-            if instance.smiles_code in cls.best_opt_energy_dict:
-                if float(instance.opt_energy) < float(cls.best_opt_energy_dict[instance.smiles_code][0]):
-                    cls.best_opt_energy_dict[instance.smiles_code] = [instance.opt_energy, instance.opt_path]
+
+        for instance in converged:
+            if instance.smiles_code in best_opt_energy_dict:
+                if float(instance.opt_energy) < float(best_opt_energy_dict[instance.smiles_code][0]):
+                    best_opt_energy_dict[instance.smiles_code] = [instance.opt_energy, instance.opt_path]
             else:
-                cls.best_opt_energy_dict[instance.smiles_code] = [instance.opt_energy, instance.opt_path]
-
-        return cls.best_opt_energy_dict
+                best_opt_energy_dict[instance.smiles_code] = [instance.opt_energy, instance.opt_path]
+                
+        return best_opt_energy_dict
 

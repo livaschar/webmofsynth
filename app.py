@@ -118,7 +118,7 @@ def upload_file():
 
     # Delete old files
     for filename in session['filenames']:
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file_path = os.path.join(session['UPLOAD_FOLDER'], filename)
         if os.path.exists(file_path):
             os.remove(file_path)
 
@@ -137,7 +137,7 @@ def upload_file():
 
             filename = secure_filename(file.filename)
             filenames.append(filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            file.save(os.path.join(session['UPLOAD_FOLDER'], filename))
             session['file_count'] += 1
             session['filenames'].append(filename)
         else:
@@ -157,10 +157,10 @@ def submit_job():
 
     try:
         # Change directory to the execution folder
-        os.chdir(EXECUTION_FOLDER)
+        os.chdir(session['EXECUTION_FOLDER'])
             
         # Execute the command and capture output
-        result = utils.main_run('uploads', option, EXECUTION_FOLDER)
+        result, user = utils.main_run('uploads', option, session['EXECUTION_FOLDER'])
 
         # utils.main_run was succesful
         if result == 1:
@@ -170,7 +170,7 @@ def submit_job():
             counter = 0
             finished = False
             while not finished and counter < 10 :
-                converged, finished = utils.check_opt(EXECUTION_FOLDER, session.get('file_count', 0))
+                converged, finished = utils.check_opt(session['EXECUTION_FOLDER'], session.get('file_count', 0), user)
                 time.sleep(5)
                 counter += 1
             
@@ -180,9 +180,9 @@ def submit_job():
                 
                 if session.get('file_count', 0) == 1:
                     print('Entered true mode')
-                    result = utils.export_results(EXECUTION_FOLDER, compare = True)
+                    result = utils.export_results(session['EXECUTION_FOLDER'], user, compare = True)
                 else:
-                    result = utils.export_results(EXECUTION_FOLDER, compare = False)
+                    result = utils.export_results(session['EXECUTION_FOLDER'], user, compare = False)
                 
                 # Check for errors or success based on command output
                 if result == 1:
@@ -216,7 +216,7 @@ def submit_job():
 @app.route('/show-csv')
 def show_csv():
 
-    file_path = os.path.join(EXECUTION_FOLDER, 'Synth_folder', 'synth_results.csv')
+    file_path = os.path.join(session['EXECUTION_FOLDER'], 'Synth_folder', 'synth_results.csv')
 
     try:
         if os.path.exists(file_path):
@@ -240,7 +240,7 @@ def print_results():
 
 @app.route('/download-csv')
 def download_csv():
-    csv_file_path = os.path.join(EXECUTION_FOLDER, 'Synth_folder/synth_results.csv')
+    csv_file_path = os.path.join(session['EXECUTION_FOLDER'], 'Synth_folder/synth_results.csv')
     
     try:
         # Ensure the file exists
