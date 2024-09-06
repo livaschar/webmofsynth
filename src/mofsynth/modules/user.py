@@ -21,6 +21,7 @@ class USER:
 
         self.job_sh = 'job.sh'
         self.run_str = 'sbatch job.sh'
+        self.run_str_sp =  "bash -l -c 'module load turbomole/7.02; x2t linker.xyz > coord; uff; t2x -c > final.xyz'"
         self.opt_cycles = 1000
 
         # MOF CLASS

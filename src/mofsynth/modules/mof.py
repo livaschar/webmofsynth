@@ -222,7 +222,9 @@ class MOF:
         os.chdir(self.sp_path)
 
         try:
-            os.system(run_str_sp)
+            p = subprocess.Popen(run_str_sp, shell=True)            
+            p.wait()
+            # os.system(run_str_sp)
         except Exception as e:
             print(f"An error occurred while running the command for turbomole: {str(e)}")
 

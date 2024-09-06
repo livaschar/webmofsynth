@@ -4,6 +4,7 @@ import os
 import re
 from . other import copy
 from . mof import MOF
+import subprocess
 
 
 @dataclass
@@ -141,7 +142,9 @@ class Linkers:
         os.chdir(self.opt_path)
 
         try:
-            os.system(run_str_sp)
+            p = subprocess.Popen(run_str_sp, shell = True)
+            p.wait()
+            # os.system(run_str_sp)
         except Exception as e:
             print(f"An error occurred while running the command for turbomole: {str(e)}")
         
@@ -154,7 +157,9 @@ class Linkers:
             f.writelines(lines)
 
         try:
-            os.system(run_str)
+            p = subprocess.Popen(run_str, shell=True)
+            p.wait()
+            # os.system(run_str)
         except Exception as e:
             print(f"An error occurred while running the command for turbomole: {str(e)}")
         
