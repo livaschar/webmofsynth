@@ -12,6 +12,7 @@ from pathlib import Path
 
 app = Flask(__name__)
 
+
 ''' random FOLDER GENERATOR '''
 def generate_random_string(length):
     characters = string.ascii_letters  # Includes both uppercase and lowercase letters
@@ -19,13 +20,12 @@ def generate_random_string(length):
 
 # Function to create session-specific folders if they don't exist
 def create_session_folders(random_str):
-    session_folder = os.path.join(BASE_FOLDER, random_str)
+    EXECUTION_FOLDER = os.path.join(BASE_FOLDER, random_str)
     UPLOAD_FOLDER = os.path.expanduser('~/TEST/repos/%s/uploads' %random_str)
     INPUT_FOLDER = os.path.expanduser('~/TEST/repos/%s/input_data' %random_str)
-    EXECUTION_FOLDER = session_folder
-
+    
     # Create folders if they don't exist
-    for folder in [session_folder, UPLOAD_FOLDER, INPUT_FOLDER]:
+    for folder in [EXECUTION_FOLDER, UPLOAD_FOLDER, INPUT_FOLDER]:
         if not os.path.exists(folder):
             os.makedirs(folder)
     
@@ -39,14 +39,6 @@ def create_session_folders(random_str):
             shutil.copy2(s, d)
 
     return UPLOAD_FOLDER, EXECUTION_FOLDER
-
-BASE_FOLDER = os.path.expanduser('~/TEST/repos')
-SOURCE_FOLDER = os.getcwd() + '/src/mofsynth/input_data'
-original_folder = os.getcwd()
-# Necessary for using sessions
-# app.secret_key = '3224dd25ca82b528ad1c59c082185f2880dc59c9c38cf98528acbedc22e086b0'
-app.secret_key = generate_random_string(20)
-
 
 def delete_directory(dir_path):
     path = Path(dir_path)
@@ -62,7 +54,23 @@ def delete_directory(dir_path):
     else:
         print(f"'{path}' does not exist.")
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 ''' --------------------------- '''
+
+
+# Folder paths
+BASE_FOLDER = os.path.expanduser('~/TEST/repos')
+original_folder = os.getcwd()
+SOURCE_FOLDER = os.getcwd() + '/src/mofsynth/input_data'
+app.secret_key = generate_random_string(20) #Necessary for using sessions
+
+# File requirements
+ALLOWED_EXTENSIONS = {'cif'}
+MAX_FILESIZE = 5 * 1024 * 1024  # 5 MB
+app.config['MAX_CONTENT_LENGTH'] = MAX_FILESIZE
+
+
 
 @app.after_request
 def after_request(response):
@@ -85,14 +93,6 @@ def page_reload():
     session.clear()
 
     return jsonify({'status': 'success'})
-
-
-# File requirements
-ALLOWED_EXTENSIONS = {'cif'}
-MAX_FILESIZE = 5 * 1024 * 1024  # 5 MB
-app.config['MAX_CONTENT_LENGTH'] = MAX_FILESIZE
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
@@ -157,7 +157,7 @@ def submit_job():
 
     try:
         # Change directory to the execution folder
-        os.chdir(session['EXECUTION_FOLDER'])
+        ##os.chdir(session['EXECUTION_FOLDER'])
             
         # Execute the command and capture output
         result, user = utils.main_run('uploads', option, session['EXECUTION_FOLDER'])
@@ -210,7 +210,8 @@ def submit_job():
         return jsonify({'error': 'Exception occurred', 'details': str(e)})
     
     finally:
-        os.chdir(original_folder)
+        pass
+        ##os.chdir(original_folder)
     
 
 @app.route('/show-csv')

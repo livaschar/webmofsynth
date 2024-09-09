@@ -109,7 +109,7 @@ class MOF:
         os.makedirs(self.rmsd_path, exist_ok = True)
     
 
-    def create_supercell(self, limit, src_dir):
+    def create_supercell(self, limit, synth_path):
         r"""
         Create a supercell for the MOF instance.
 
@@ -120,26 +120,33 @@ class MOF:
         """        
         copy(self.init_path, self.cif2cell_path, f"{self.name}.cif")
         
-        os.chdir(self.cif2cell_path)
-
+        init_file = os.path.join(synth_path, self.name, "cif2cell", f'{self.name}.cif')
+        print('\n\n Init file:', init_file)
+        rename_file = os.path.join(synth_path, self.name, "cif2cell", f'{self.name}_supercell.cif')
+        print('\n\n Final file:', rename_file)
+        ##os.chdir(self.cif2cell_path)
+        
         try:
-            structure = IStructure.from_file(f"{self.name}.cif")
+            structure = IStructure.from_file(init_file)
+            ## structure = IStructure.from_file(f"{self.name}.cif")
             if limit is not None and all(cell_length > 30 for cell_length in structure.lattice.abc):
-                os.rename(f"{self.name}.cif",f"{self.name}_supercell.cif")
+                os.rename(init_file, rename_file)
+                ##os.rename(f"{self.name}.cif",f"{self.name}_supercell.cif")
             else:
                 supercell = structure*2
                 w = CifWriter(supercell)
-                w.write_file(f"{self.name}_supercell.cif")
+                w.write_file(rename_file)
+                ##w.write_file(f"{self.name}_supercell.cif")
         except:
             return False
 
-        os.chdir(src_dir)
+        ##os.chdir(src_dir)
 
         copy(self.cif2cell_path, self.fragmentation_path, f"{self.name}_supercell.cif")
 
         return True, f"{self.name}_supercell.cif"
 
-    def fragmentation(self, src_dir):
+    def fragmentation(self, synth_path):
         r"""
         Perform the fragmentation process for the MOF instance.
 
@@ -153,15 +160,29 @@ class MOF:
         The function relies on the `cif2mofid` and `copy` functions.
 
         """
-        os.chdir(self.fragmentation_path)
+        import shutil
+        ##os.chdir(self.fragmentation_path)
+        init_file = os.path.join(synth_path, self.name, "fragmentation", f"{self.name}_supercell.cif")
 
-        mofid = cif2mofid(f"{self.name}_supercell.cif")
+        
+        print('\n\n\nmofid_1')
+        from mofid.run_mofid import cif2mofid
+        mofid = cif2mofid(init_file)
+        p = subprocess.Popen(cif2mofid(init_file), cwd=self.fragmentation_path)
+        print('\n\n\nmofid_2')
 
-        os.chdir(src_dir)
+        # Define the path where you want to redirect/save the output folder
+        # destination_dir = os.path.join(synth_path, self.name, "fragmentation")
+        
+        # # Move the folder
+        # output_dir = os.path.join(os.getcwd(), 'Output')
+        # shutil.move(output_dir, destination_dir)
+    
+        ##os.chdir(src_dir)
 
-        copy(os.path.join(self.fragmentation_path,"Output/MetalOxo"), self.obabel_path, "linkers.cif")
+        copy(os.path.join(self.fragmentation_path, "Output/MetalOxo"), self.obabel_path, "linkers.cif")
  
-    def obabel(self, src_dir):
+    def obabel(self, synth_path):
         r"""
         Convert the linkers.cif file to XYZ and MOL formats and keep the longest linker contained in CIF file.
 
@@ -176,31 +197,39 @@ class MOF:
 
         """        
         
-        os.chdir(self.obabel_path)
+        ##os.chdir(self.obabel_path)
+        init_file = os.path.join(synth_path, self.name, "obabel", "linkers.cif")
+        final_file = os.path.join(synth_path, self.name, "obabel", "linkers_prom_222.xyz")
 
         ''' CIF TO XYZ '''
-        command = ["obabel", "-icif", "linkers.cif", "-oxyz", "-Olinkers_prom_222.xyz", "-r"]   
+        command = ["obabel", "-icif", init_file, "-oxyz", "-O", final_file, "-r"]   
         try:
+            #p = subprocess.Popen(command, capture_output=True, text=True, check=True, cwd=self.fragmentation_path)
             subprocess.run(command, capture_output=True, text=True, check=True)
         except:
             raise ModuleNotFoundError
-    
-        os.rename("linkers_prom_222.xyz","linker.xyz")
+        
+        xyz_file_initial = os.path.join(synth_path, self.name, "obabel", 'linkers_prom_222.xyz')
+        xyz_file_final = os.path.join(synth_path, self.name, "obabel", 'linker.xyz')
+        ##os.rename("linkers_prom_222.xyz", "linker.xyz")
+        os.rename(xyz_file_initial, xyz_file_final)
         ''' ----------- '''
 
         ''' CIF TO SMI '''
-        command = ["obabel", "linker.xyz", "-xc", "-O", "linker.smi"]
+        smi_file = os.path.join(synth_path, self.name, "obabel", 'linker.smi')
+        command = ["obabel", xyz_file_final, "-xc", "-O", smi_file]
         try:
+            #p = subprocess.Popen(command, capture_output=True, text=True, check=True, cwd=self.fragmentation_path)
             subprocess.run(command, capture_output=True, text=True, check=True)
         except:
             raise ModuleNotFoundError
         ''' ----------- '''
     
-        os.chdir(src_dir)
+        ##os.chdir(src_dir)
     
         copy(self.obabel_path, self.turbomole_path, "linker.xyz")
             
-    def single_point(self, src_dir, run_str_sp):
+    def single_point(self):
         r"""
         Perform a single-point calculation using Turbomole.
 
@@ -215,20 +244,37 @@ class MOF:
         The Turbomole command is specified by the `run_str_sp` attribute.
 
         """
+        import shutil
 
         copy(self.turbomole_path, self.sp_path, "linker.xyz")
-
+        init_file = os.path.join(self.turbomole_path, "sp", "linker.xyz")
+        final_file = os.path.join(self.turbomole_path, "sp", "final.xyz")
+        
         """ SINGLE POINT CALCULATION """
-        os.chdir(self.sp_path)
-
+        ##os.chdir(self.sp_path)
+        self.run_str_sp =  f"bash -l -c 'module load turbomole/7.02; x2t {init_file} > coord; uff; t2x -c > {final_file}'"
+        
+        # # Update the command to redirect file outputs to this directory
+        # self.run_str_sp = (
+        #     f"bash -l -c 'module load turbomole/7.02; "
+        #     f"x2t {init_file} > {os.path.join(self.sp_path, 'coord')}; "
+        #     f"uff > {os.path.join(self.sp_path, 'uffenergy')} ;"
+        #     f"t2x -c > {os.path.join(self.sp_path, 'final.xyz')}'"
+        # )
+        
         try:
-            p = subprocess.Popen(run_str_sp, shell=True)            
+            p = subprocess.Popen(self.run_str_sp, shell=True, cwd=self.sp_path)
             p.wait()
             # os.system(run_str_sp)
         except Exception as e:
             print(f"An error occurred while running the command for turbomole: {str(e)}")
+        
+        # Move all generated files to the output directory
+        # files_to_move = ['coord', 'control', 'uffenergy', 'ufftopology', 'uffhessian0-0', 'uffgradx', 'uffgradient', final_file]  # List of files generated by the command
+        # for file in files_to_move:
+        #     shutil.move(file, self.sp_path)
 
-        os.chdir(src_dir)
+        ##os.chdir(src_dir)
 
 
     def check_fragmentation(self):
@@ -442,7 +488,7 @@ class MOF:
                 mof.opt_energy = float(linker.opt_energy)
                 mof.opt_status = linker.opt_status
                 mof.calc_de(best_opt_energy_dict)
-                mof.calc_rmsd(best_opt_energy_dict, src_dir)
+                mof.calc_rmsd(best_opt_energy_dict)
             
                 # Create a new DataFrame row
                 row = pd.DataFrame({
@@ -503,7 +549,7 @@ class MOF:
         
         return self.de
 
-    def calc_rmsd(self, best_opt_energy_dict, src_dir):
+    def calc_rmsd(self, best_opt_energy_dict):
         r"""
         Calculate the RMSD (Root Mean Square Deviation) for the MOF instance.
 
@@ -522,10 +568,13 @@ class MOF:
     
         copy(best_opt_energy_dict[self.linker_smiles][1], self.rmsd_path, 'final.xyz', 'final_opt.xyz')
         copy(self.sp_path, self.rmsd_path, 'final.xyz', 'final_sp.xyz')
+        opt_file = os.path.join(self.rmsd_path, 'final_opt.xyz')
+        sp_file = os.path.join(self.rmsd_path, 'final_sp.xyz')
+        sp_mod_file = os.path.join(self.rmsd_path, 'final_sp_mod.xyz')
         
-        os.chdir(self.rmsd_path)
+        ##os.chdir(self.rmsd_path)
     
-        check = MOF.rmsd_p()
+        check = MOF.rmsd_p(sp_file, opt_file, self.rmsd_path)
 
         if check == False:
             if input('Error while calculating the -p RMSD instance. Continue? [y/n]: ') == 'y':
@@ -534,17 +583,17 @@ class MOF:
                 return 0
     
         try:
-            for sp in ['final_sp.xyz', 'final_sp_mod.xyz']:
-                command = f"calculate_rmsd -e final_opt.xyz {sp}"
+            for sp in [sp_file, sp_mod_file]:
+                command = f"calculate_rmsd -e {opt_file} {sp}"
                 rmsd.append(subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True))
         
-                command = f"calculate_rmsd -e --reorder-method hungarian final_opt.xyz {sp}"
+                command = f"calculate_rmsd -e --reorder-method hungarian {opt_file} {sp}"
                 rmsd.append(subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True))
             
-                command = f"calculate_rmsd -e --reorder-method inertia-hungarian final_opt.xyz {sp}"
+                command = f"calculate_rmsd -e --reorder-method inertia-hungarian {opt_file} {sp}"
                 rmsd.append(subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True))
             
-                command = f"calculate_rmsd -e --reorder-method distance final_opt.xyz {sp}"
+                command = f"calculate_rmsd -e --reorder-method distance {opt_file} {sp}"
                 rmsd.append(subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True))        
         
         except Exception as e:
@@ -573,7 +622,7 @@ class MOF:
                 # print(f"Warning: Unable to convert {i.stdout} to float for {i.args}")
 
     
-        with open('result.txt', 'w') as file:
+        with open(os.path.join(self.rmsd_path, 'result.txt'), 'w') as file:
             file.write(str(minimum))
             file.write('\n')
             try:
@@ -583,10 +632,10 @@ class MOF:
                     
         self.rmsd = minimum
     
-        os.chdir(src_dir)
+        ##os.chdir(src_dir)
     
     @staticmethod
-    def rmsd_p(reorder = False, recursion_depth = 0):
+    def rmsd_p(sp_file, opt_file, rmsd_path, reorder = False, recursion_depth = 0):
         r"""
         Creating another instance using new reordering method not include in the original calculate_rmsd tool.
 
@@ -624,19 +673,22 @@ class MOF:
         if recursion_depth >= 3:
             print("Recursion depth limit reached. Exiting.")
             return False
-    
+        
+        sp_mod_txt_path = os.path.join(rmsd_path, 'final_sp_mod.txt')
+        sp_mod_xyz_path = os.path.join(rmsd_path, 'final_sp_mod.xyz')
+        
         try:
             if reorder == False:
-                os.system("calculate_rmsd -p final_opt.xyz final_sp.xyz > final_sp_mod.txt")
+                os.system(f"calculate_rmsd -p {opt_file} {sp_file} > {sp_mod_txt_path}")
             else:
-                os.system("calculate_rmsd -p --reorder final_opt.xyz final_sp.xyz > final_sp_mod.txt")
+                os.system(f"calculate_rmsd -p --reorder {opt_file} {sp_file} > {sp_mod_txt_path}")
     
         except Exception as e:
             print(f"An error occurred while running the command calculate_rmsd: {str(e)}")
             return False
     
         data = []
-        with open('final_sp_mod.txt', 'r') as input_file:
+        with open(sp_mod_txt_path, 'r') as input_file:
             lines = input_file.readlines()
     
             for line_number, line in enumerate(lines):
@@ -653,13 +705,14 @@ class MOF:
                     atomic_number = int(parts[0])
                 except ValueError:
                     input_file.close()
-                    return MOF.rmsd_p(reorder=True, recursion_depth=recursion_depth + 1)
+                    return MOF.rmsd_p(sp_file, opt_file, rmsd_path, reorder=True, recursion_depth=recursion_depth + 1)
     
                 symbol = atomic_symbols.get(atomic_number)
                 coordinates = [float(coord) for coord in parts[1:4]]
                 data.append((symbol, coordinates))
-    
-        with open('final_sp_mod.xyz', 'w') as output_file:
+        
+
+        with open(sp_mod_xyz_path, 'w') as output_file:
             output_file.write(f"{len(data)}\n")
             output_file.write("\n")
             for symbol, coords in data:

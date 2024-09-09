@@ -6,7 +6,7 @@ class USER:
         self.src_dir = ''
         self.settings_path = ''
         self.job_sh_path = ''
-        self.synth_path = './Synth_folder'
+        self.synth_path = ''
         self.path_to_linkers_directory = os.path.join(self.synth_path, '_Linkers_')
         self.output_file_name = 'synth_results'
         self.instances = []
