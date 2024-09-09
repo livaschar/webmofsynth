@@ -165,11 +165,13 @@ class MOF:
         init_file = os.path.join(synth_path, self.name, "fragmentation", f"{self.name}_supercell.cif")
 
         
-        print('\n\n\nmofid_1')
+        # print('\n\n\nmofid_1')
         from mofid.run_mofid import cif2mofid
-        mofid = cif2mofid(init_file)
-        p = subprocess.Popen(cif2mofid(init_file), cwd=self.fragmentation_path)
-        print('\n\n\nmofid_2')
+        # print("Fragmentation path: ", self.fragmentation_path)
+        command = ['cif2mofid', init_file]
+        p = subprocess.Popen(command, cwd=self.fragmentation_path, stderr=subprocess.STDOUT)
+        p.wait()
+        # print('\n\n\nmofid_2')
 
         # Define the path where you want to redirect/save the output folder
         # destination_dir = os.path.join(synth_path, self.name, "fragmentation")
