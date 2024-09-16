@@ -10,6 +10,20 @@ h2 {
     color: #e7e4e3; /* Change the color code as needed */
 }
 
+
+.custom-link {
+    text-decoration: none; /* Remove the underline */
+    font-weight: bold; /* Make the text bold */
+    color: inherit; /* Inherit the surrounding text color */
+}
+
+.custom-link:hover {
+    text-decoration: none; /* Ensure no underline on hover */
+    font-weight: bold; /* Keep bold on hover */
+    color: #fafafa;
+}
+
+
 /* Body styles */
 body {
     font-family: Arial, sans-serif;
@@ -235,6 +249,38 @@ body {
 /* ------------------------------- */
 
 
+
+#explanation {
+    width: 40%; /* Decreased width for a smaller box */
+    margin: 80px auto; /* Center the div and add vertical space */
+    padding: 10px; /* Reduced padding to make the box more compact */
+    background-color: #dbdbdb;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+#explanation h2 {
+    font-size: 0.95em;
+    color: #1a1a1a;
+    margin-bottom: 1px;
+    margin-top: 10px;
+}
+
+#explanation p {
+    font-size: 0.9em;
+    line-height: 1.6;
+    color: #303030;
+}
+
+#explanation strong {
+    font-weight: bold;
+    color: #0ab418;
+}
+
+
+
+
 /* ------------------------------- */
 /* Loader container styles */
 .loader-container {
@@ -368,6 +414,48 @@ body {
 }
 /* ------------------------------- */
 /* ------------------------------- */
+
+.footer {
+    text-align: center;
+    margin-top: 70px;
+    padding: 10px;
+    /* background-color: #f2f2f2; */
+    color: #333;
+}
+
+.sponsor-images {
+    display: flex;
+    justify-content: center; /* Aligns images horizontally */
+    align-items: center;     /* Aligns images vertically if needed */
+    gap: 20px;               /* Space between the images */
+    margin-bottom: 10px;
+    margin-top: 20px;
+}
+
+/* General rule for all sponsor logos */
+.sponsor-images img {
+    width: 90px;   /* Base size for all images */
+    height: auto;   /* Maintains aspect ratio */
+}
+
+/* Specific adjustments for ELIDEK and EU logos */
+.sponsor-images img[alt="ELIDEK Logo"] {
+    width: 180px;  /* Increase ELIDEK logo size */
+    background-color: rgb(255, 255, 255);
+}
+
+.sponsor-images img[alt="MOSTH2 Logo"] {
+    width: 200px;  /* Increase ELIDEK logo size */
+}
+.sponsor-images img[alt="EU Logo"] {
+    width: 180px;  /* Increase EU logo size */
+    background-color: rgb(255, 255, 255);
+}
+
+.footer p {
+    font-size: 1em;   /* Adjust font size if necessary */
+    color: #cac7c8;
+}
 
 
 

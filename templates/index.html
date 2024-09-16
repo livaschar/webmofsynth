@@ -19,14 +19,15 @@
         <!-- <img src="static/images/logo/final_black_1-removebg-preview.png" alt="Logo"> -->
         <img src="static/images/logo/blue.png" alt="Logo">
         <h1>A Computational tool toward synthetic likelihood predictions of MOFs</h1>
-        <p>Provided by Materials Modeling & Design group of the University of Crete</p>
+        <p>Provided by <a href="https://chemistry.uoc.gr/mmdg" target="_blank" class="custom-link">Materials Modeling & Design group</a> of the University of Crete</p>
+
     </div>
 
     <div class="file-upload-container">
         <h3>1. Please insert your file</h3>
         <form id="uploadForm" enctype="multipart/form-data">
             <input type="file" id="file" name="file" multiple onchange="showSelectedFiles()">
-            <label for="file">Choose files</label>
+            <label for="file">Choose up to 10 files</label>
             <div id="fileList"></div>
             <button type="button" onclick="uploadFiles()">Upload Files</button>
         </form>
@@ -38,7 +39,7 @@
     <div class="options-container">
         <h3>2. Supercell limit (&#8491;):</h3>
         <form id="submitForm">
-            <input type="radio" id="optionNone" name="option" value="none">
+            <input type="radio" id="optionNone" name="option" value="None">
             <label for="optionNone">Nan</label><br>
             <input type="radio" id="option5" name="option" value="5">
             <label for="option5">>5</label><br>
@@ -63,7 +64,7 @@
     </div>
         
     <div class="button-container">
-        <button type="button" onclick="showCSV()">Show CSV</button>    
+        <button type="button" onclick="showCSV()">Show Results</button>    
         <button type="button" onclick="downloadButton()">Download CSV</button>
     </div>
     
@@ -77,19 +78,40 @@
     <!-- <button type="button" onclick="fetchResults()">fetchResults</button> -->
     
     <div class="github-link-container">
-        <a href="https://github.com/livaschar/mofsynth" target="_blank" class="github-link">
+        <a href="https://github.com/frudakis-research-group/mofsynth" target="_blank" class="github-link">
             <!-- <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub Logo" class="github-logo"> -->
             <img src="static/images/GitHub_Symbol.png" alt="GitHub Logo" class="github-logo">
-            Visit our GitHub Repo
+            Visit our GitHub Repository
         </a>
     </div>
-
+    
+    
+    
     <footer class="footer">
-        <p>Cite this work DOI<br>
-        ©2024 Materials Modelling and Design Group.  GNU General Public License v3.0 only.
+        <h2>Supported by
+        </h2>
+        <div class="sponsor-images">
+            <a href="https://www.toyota-europe.com/" target="_blank">
+                <img src="static/images/sponsors/TOYOTA.png" alt="Toyota Logo">
+            </a>
+            <a href="https://most-h2.eu/" target="_blank">
+                <img src="static/images/sponsors/MOSTH2.png" alt="MOSTH2 Logo">
+            </a>
+            <a href="https://www.elidek.gr/en/homepage/" target="_blank">
+                <img src="static/images/sponsors/ELIDEK.png" alt="ELIDEK Logo">
+            </a>
+            <a href="https://www.uoc.gr/en/home/" target="_blank">
+                <img src="static/images/sponsors/UOC.png" alt="UOC Logo">
+            </a>
+            <a href="https://european-union.europa.eu/index_en" target="_blank">
+                <img src="static/images/sponsors/EU.png" alt="EU Logo">
+            </a>
+
+        </div>
+        <p>Cite this work: Paper under review.<br>
+        ©2024 Materials Modelling and Design Group. GNU General Public License v3.0 only.
         </p>
     </footer>
-
     
 </body>
 </html>

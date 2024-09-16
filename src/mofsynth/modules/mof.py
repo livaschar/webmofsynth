@@ -124,7 +124,7 @@ class MOF:
 
         try:
             structure = IStructure.from_file(f"{self.name}.cif")
-            if limit is not None and all(cell_length > 30 for cell_length in structure.lattice.abc):
+            if limit!= 'None' and all(cell_length > int(limit) for cell_length in structure.lattice.abc):
                 os.rename(f"{self.name}.cif",f"{self.name}_supercell.cif")
             else:
                 supercell = structure*2
