@@ -104,16 +104,6 @@ def upload_file():
     # Check if file count exceeds the limit (10)
     if len(files) > 10:
         return jsonify({'error': 'Upload limit exceeded. You can upload up to 10 files.'}), 400
-
-    # # Delete old files
-    # for filename in session['filenames']:
-    #     file_path = os.path.join(session['UPLOAD_FOLDER'], filename)
-    #     if os.path.exists(file_path):
-    #         os.remove(file_path)
-
-    # # Reset the session file count and filenames
-    # session['file_count'] = 0
-    # session['filenames'] = []
     
     if 'first_visit' not in session:
         print('First visit')
@@ -141,22 +131,22 @@ def upload_file():
         else:
             return jsonify({'error': 'Invalid file type. Allowed file types: .cif'}), 400
 
+    print("Session in upload:", session)
+
     return jsonify({'message': 'Files uploaded successfully', 'filenames': filenames}), 200
 
 
 @app.route('/submit-job', methods=['POST'])
 def submit_job():
     
+    # Session resets for some reason somewhere after upload_file() and before submit_job()
+    print("Session in submit:", session)
+
     option = request.form.get('option')
     if not option:
         return jsonify({'error': 'No option selected'})
-    
-    original_folder = os.getcwd()
 
-    try:
-        # Change directory to the execution folder
-        os.chdir(session['EXECUTION_FOLDER'])
-            
+    try:    
         # Execute the command and capture output
         result, user = utils.main_run('uploads', option, session['EXECUTION_FOLDER'])
 
@@ -172,7 +162,6 @@ def submit_job():
                 time.sleep(5)
                 counter += 1
             
-
             # if all runs have finished
             if finished and converged != []:
                 
@@ -206,10 +195,7 @@ def submit_job():
     
     except Exception as e:
         return jsonify({'error': 'Exception occurred', 'details': str(e)})
-    
-    finally:
-        os.chdir(original_folder)
-    
+
 
 @app.route('/show-csv')
 def show_csv():
@@ -256,5 +242,5 @@ def page_not_found(error):
     
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=False)
+    app.run(host='0.0.0.0', port=5000, debug=False)
     # app.run(debug=False)
