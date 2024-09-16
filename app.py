@@ -64,24 +64,13 @@ def delete_directory(dir_path):
 
 ''' --------------------------- '''
 
-@app.after_request
-def after_request(response):
-    if 'first_visit' not in session and response.status_code == 200:
-        print('First visit')
-        session['first_visit'] = True
-        random_str = generate_random_string(10)
-        UPLOAD_FOLDER, EXECUTION_FOLDER = create_session_folders(random_str)
-        session['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-        session['EXECUTION_FOLDER'] = EXECUTION_FOLDER
-        print("Created", UPLOAD_FOLDER, "for upload and", EXECUTION_FOLDER, "for execution")
-
-    return response
 
 @app.route('/reload', methods=['POST'])
 def page_reload():
     print('Page reloaded')
     
-    delete_directory(session['EXECUTION_FOLDER'])
+    if 'EXECUTION_FOLDER' in session:
+        delete_directory(session['EXECUTION_FOLDER'])
     session.clear()
 
     return jsonify({'status': 'success'})
@@ -116,15 +105,24 @@ def upload_file():
     if len(files) > 10:
         return jsonify({'error': 'Upload limit exceeded. You can upload up to 10 files.'}), 400
 
-    # Delete old files
-    for filename in session['filenames']:
-        file_path = os.path.join(session['UPLOAD_FOLDER'], filename)
-        if os.path.exists(file_path):
-            os.remove(file_path)
+    # # Delete old files
+    # for filename in session['filenames']:
+    #     file_path = os.path.join(session['UPLOAD_FOLDER'], filename)
+    #     if os.path.exists(file_path):
+    #         os.remove(file_path)
 
-    # Reset the session file count and filenames
-    session['file_count'] = 0
-    session['filenames'] = []
+    # # Reset the session file count and filenames
+    # session['file_count'] = 0
+    # session['filenames'] = []
+    
+    if 'first_visit' not in session:
+        print('First visit')
+        session['first_visit'] = True
+        random_str = generate_random_string(10)
+        UPLOAD_FOLDER, EXECUTION_FOLDER = create_session_folders(random_str)
+        session['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+        session['EXECUTION_FOLDER'] = EXECUTION_FOLDER
+        print("Created", UPLOAD_FOLDER, "for upload and", EXECUTION_FOLDER, "for execution")
 
     filenames = []
     for file in files:

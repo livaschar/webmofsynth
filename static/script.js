@@ -65,6 +65,7 @@ function submitJob() {
         success: function(response) {
             document.getElementById('loader').style.display = 'none'; // Hide loader
             document.getElementById('jobStatus').innerText = response.message;
+            console.log(response)
             document.getElementById('submitButton').disabled = false;
         },
         error: function(error) {
