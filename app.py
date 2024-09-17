@@ -44,8 +44,8 @@ BASE_FOLDER = os.path.expanduser('~/TEST/repos')
 SOURCE_FOLDER = os.getcwd() + '/src/mofsynth/input_data'
 original_folder = os.getcwd()
 # Necessary for using sessions
-# app.secret_key = '3224dd25ca82b528ad1c59c082185f2880dc59c9c38cf98528acbedc22e086b0'
-app.secret_key = generate_random_string(20)
+app.secret_key = '3224dd25ca82b528ad1c59c082185f2880dc59c9c38cf98528acbedc22e086b0'
+# app.secret_key = generate_random_string(20)
 
 
 def delete_directory(dir_path):

@@ -4,6 +4,7 @@ import os
 import re
 from . other import copy
 from . mof import MOF
+import subprocess
 
 
 @dataclass
@@ -118,7 +119,7 @@ class Linkers:
     #     if job_sh != None:
     #         cls.job_sh = job_sh
 
-    def optimize(self, opt_cycles, job_sh_path, job_sh, run_str_sp, run_str, src_dir):
+    def optimize(self, opt_cycles, job_sh_path, job_sh):
         r"""
         Optimize the linker structure.
 
@@ -138,27 +139,37 @@ class Linkers:
         # Must be before os.chdir(self.opt_path)
         copy(job_sh_path, self.opt_path, job_sh)
         
-        os.chdir(self.opt_path)
+        ##os.chdir(self.opt_path)
+
+        init_file = os.path.join(self.opt_path, "linker.xyz")
+        final_file = os.path.join(self.opt_path, "final.xyz")
+        self.run_str_sp =  f"bash -l -c 'module load turbomole/7.02; x2t {init_file} > coord; uff; t2x -c > {final_file}'"
 
         try:
-            os.system(run_str_sp)
+            p = subprocess.Popen(self.run_str_sp, shell = True, cwd=self.opt_path)
+            p.wait()
+            # os.system(run_str_sp)
         except Exception as e:
             print(f"An error occurred while running the command for turbomole: {str(e)}")
-        
-        with open("control", 'r') as f:
+
+        with open(os.path.join(self.opt_path, "control"), 'r') as f:
             lines = f.readlines()
         words = lines[2].split()
         words[0] = str(opt_cycles)
         lines[2] = ' '.join(words) +'\n'
-        with open("control",'w') as f:
+        with open(os.path.join(self.opt_path, "control"),'w') as f:
             f.writelines(lines)
 
+        job_sh_path = os.path.join(self.opt_path, 'job.sh')
+        self.run_str = f'sbatch {job_sh_path}'
         try:
-            os.system(run_str)
+            p = subprocess.Popen(self.run_str, shell=True, cwd=self.opt_path)
+            p.wait()
+            # os.system(run_str)
         except Exception as e:
             print(f"An error occurred while running the command for turbomole: {str(e)}")
-        
-        os.chdir(src_dir)
+    
+        ##os.chdir(src_dir)
 
     @classmethod
     def check_optimization_status(cls, linkers_list):
@@ -212,4 +223,3 @@ class Linkers:
                 best_opt_energy_dict[instance.smiles_code] = [instance.opt_energy, instance.opt_path]
                 
         return best_opt_energy_dict
-

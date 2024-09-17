@@ -6,7 +6,7 @@ class USER:
         self.src_dir = ''
         self.settings_path = ''
         self.job_sh_path = ''
-        self.synth_path = './Synth_folder'
+        self.synth_path = ''
         self.path_to_linkers_directory = os.path.join(self.synth_path, '_Linkers_')
         self.output_file_name = 'synth_results'
         self.instances = []
@@ -21,6 +21,7 @@ class USER:
 
         self.job_sh = 'job.sh'
         self.run_str = 'sbatch job.sh'
+        self.run_str_sp =  "bash -l -c 'module load turbomole/7.02; x2t linker.xyz > coord; uff; t2x -c > final.xyz'"
         self.opt_cycles = 1000
 
         # MOF CLASS

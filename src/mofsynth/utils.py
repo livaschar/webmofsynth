@@ -83,7 +83,8 @@ def main_run(directory, supercell_limit, EXECUTION_FOLDER):
     user = USER(unique_user)
     
     # Create the working directory
-    os.makedirs("Synth_folder", exist_ok=True)
+    user.synth_path = os.path.join(EXECUTION_FOLDER, 'Synth_folder')
+    os.makedirs(user.synth_path, exist_ok=True)
 
     # If settings file exists, read settings from there else ask for user input
     user.settings_path = os.path.join(EXECUTION_FOLDER, 'input_data/settings.txt')
@@ -100,7 +101,7 @@ def main_run(directory, supercell_limit, EXECUTION_FOLDER):
     print(f'  \033[1;32m\nSTART OF SYNTHESIZABILITY EVALUATION\033[m')
 
     # A list of cifs from the user soecified directory
-    user_dir = os.path.join(f"./{directory}")
+    user_dir = os.path.join(os.path.join(EXECUTION_FOLDER, directory))
     cifs = [item for item in os.listdir(user_dir) if item.endswith(".cif")]
 
     if cifs == []:
@@ -129,11 +130,12 @@ def main_run(directory, supercell_limit, EXECUTION_FOLDER):
 
             # Create supercell, do the fragmentation, extract one linker,
             # calculate single point energy
-            supercell_check, _ = mof.create_supercell(supercell_limit, user.src_dir)        
-            mof.fragmentation(user.src_dir)
-            mof.obabel(user.src_dir)
-            mof.single_point(user.src_dir, user.run_str_sp)
+            supercell_check, _ = mof.create_supercell(supercell_limit, user.synth_path)
+            mof.fragmentation(user.synth_path)
+            mof.obabel(user.synth_path)
+            mof.single_point()
         
+
         # Check if supercell procedure runned correctly
         if supercell_check is False:
             user.fault_supercell.append(mof.name)
@@ -146,33 +148,33 @@ def main_run(directory, supercell_limit, EXECUTION_FOLDER):
             user.instances.pop()
     
     # Find the unique linkers from the whole set of MOFs
+    user.path_to_linkers_directory = os.path.join(user.synth_path, '_Linkers_')
     smiles_id_dict , user.new_instances, user.fault_smiles, user.linker_instances = MOF.find_unique_linkers(user.instances, user.path_to_linkers_directory)
 
     # Proceed to the optimization procedure of every linker
     for linker in user.linker_instances:
         print(f'\n - \033[1;34mLinker under optimization study: {linker.smiles_code}, of {linker.mof_name}\033[m -')
-        linker.optimize(user.opt_cycles, user.job_sh_path, user.job_sh, user.run_str_sp, user.run_str, user.src_dir)
+        linker.optimize(user.opt_cycles, user.job_sh_path, user.job_sh)
     
-
     # Right instances of MOF class
-    with open('cifs.pkl', 'wb') as file:
+    with open(os.path.join(EXECUTION_FOLDER, 'cifs.pkl'), 'wb') as file:
         pickle.dump(user.instances, file)
     
     # Right instances of Linkers class
-    with open('linkers.pkl', 'wb') as file:
+    with open(os.path.join(EXECUTION_FOLDER, 'linkers.pkl'), 'wb') as file:
         pickle.dump(user.linker_instances, file)
     
     if user.fault_fragment != []:
-        with open('fault_fragmentation.txt', 'w') as file:
+        with open(os.path.join(EXECUTION_FOLDER, 'fault_fragmentation.txt'), 'w') as file:
             for mof_name in user.fault_fragment:
                 file.write(f'{mof_name}\n')
 
     if user.fault_smiles != []:
-        with open('fault_smiles.txt', 'w') as file:
+        with open(os.path.join(EXECUTION_FOLDER, 'fault_smiles.txt'), 'w') as file:
             for mof_name in user.fault_smiles:
                 file.write(f'{mof_name}\n')
     
-    with open('smiles_id_dictionary.txt', 'w') as file:
+    with open(os.path.join(EXECUTION_FOLDER, 'smiles_id_dictionary.txt'), 'w') as file:
         for key, value in smiles_id_dict.items():
             file.write(f'{key} : {value}\n')
     
@@ -189,7 +191,7 @@ def check_opt(EXECUTION_FOLDER, len_files, user):
         A tuple containing lists of converged and not converged linker instances.
     """  
 
-    os.chdir(EXECUTION_FOLDER)
+    ##os.chdir(EXECUTION_FOLDER)
     
     _, linkers, _= load_objects(EXECUTION_FOLDER)
 
@@ -204,7 +206,7 @@ def export_results(EXECUTION_FOLDER, user, compare = False):
     from . modules.other import load_objects
     import pandas as pd
     
-    os.chdir(EXECUTION_FOLDER)
+    ##os.chdir(EXECUTION_FOLDER)
     
     cifs, linkers, id_smiles_dict = load_objects(EXECUTION_FOLDER)
    
@@ -221,6 +223,7 @@ def export_results(EXECUTION_FOLDER, user, compare = False):
 
     results_list = MOF.analyse(cifs, linkers, best_opt_energy_dict, id_smiles_dict, df, user.src_dir)
 
+    user.results_csv_path = os.path.join(user.synth_path, f'{user.output_file_name}.csv')
     write_csv_results(results_list, os.path.join(EXECUTION_FOLDER, user.results_csv_path))    
     return 1
 
