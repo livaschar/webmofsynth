@@ -8,27 +8,20 @@
     <link rel="stylesheet" href="static/style.css">
 </head>
 <body>
-    <h2 style="color: #ffffff;">CSV Results</h2>
+    <h2 style="color: #ffffff;">Results</h2>
     <div id="results">
         {{ table|safe }}
     </div>
     
-    <div class="github-link-container">
-        <a href="https://github.com/frudakis-research-group/mofsynth" target="_blank" class="github-link">
-            <!-- <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub Logo" class="github-logo"> -->
-            <img src="static/images/GitHub_Symbol.png" alt="GitHub Logo" class="github-logo">
-            Visit our GitHub Repository
-        </a>
-    </div>
     
     <div id="explanation">
         <h2>Energy Percentile Rank</h2>
         <p>
             Indicates how a material's linker energy ranks compared to others in a dataset. A rank of 10% means it's in the top 10% of materials from the 
-            <a href="https://qmof.org" target="_blank" class="custom-link"><strong>QMOF</strong></a>, 
-            <a href="https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/JDMR2K" target="_blank" class="custom-link"><strong>CoRE MOF 2019</strong></a>, 
+            <a href="https://next-gen.materialsproject.org/mofs" target="_blank" class="custom-link"><strong>QMOF</strong></a>, 
+            <a href="https://pubs.acs.org/doi/full/10.1021/acs.jced.9b00835" target="_blank" class="custom-link"><strong>CoRE MOF 2019</strong></a>, 
             and 
-            <a href="https://tobacco-db.org" target="_blank" class="custom-link"><strong>ToBaCCo</strong></a> 
+            <a href="https://pubs.acs.org/doi/10.1021/acs.cgd.7b00848" target="_blank" class="custom-link"><strong>ToBaCCo</strong></a> 
             databases.
         </p>        
         
@@ -69,6 +62,13 @@
         
     </div>
     
+    <div class="github-link-container">
+        <a href="https://github.com/frudakis-research-group/mofsynth" target="_blank" class="github-link">
+            <!-- <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub Logo" class="github-logo"> -->
+            <img src="static/images/GitHub_Symbol.png" alt="GitHub Logo" class="github-logo">
+            Visit our GitHub Repository
+        </a>
+    </div>
 
 
     <footer class="footer">

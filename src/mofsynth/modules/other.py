@@ -99,9 +99,9 @@ def write_xlsx_results(results_list, results_xlsx_path):
 
 def write_csv_results(results_list, results_csv_path):
     
-    headers = ["Ranking", "Filename", "Energy Percentile Rank (%)", "RMSD Percentile Rank (%)", "Energy (kcal/mol)", "RMSD (A)", "Smiles", "Single Point Energy (au)", "Optimized Energy (au)", "Status"]    
+    headers = ["Index", "Filename", "Energy Percentile Rank (%)", "RMSD Percentile Rank (%)", "Energy (kcal/mol)", "RMSD (A)", "Smiles", "Single Point Energy (au)", "Optimized Energy (au)", "Status"]    
     
-    sorted_results = sorted(results_list, key=lambda x: -float(x[2]))
+    sorted_results = sorted(results_list, key=lambda x: -float(x[1]))
     
     # Open the CSV file for writing
     with open(results_csv_path, mode='w', newline='') as file:
