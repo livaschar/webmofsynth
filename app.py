@@ -9,8 +9,17 @@ import secrets
 import string
 import shutil
 from pathlib import Path
+from flask_caching import Cache
+from flask_compress import Compress
+# from flask_assets import Environment, Bundle # add later on a need basis
+
 
 app = Flask(__name__)
+cache = Cache(config={'CACHE_TYPE': 'redis'})
+cache.init_app(app)
+Compress(app)
+# assets = Environment(app)
+# js = Bundle
 
 ''' random FOLDER GENERATOR '''
 def generate_random_string(length):
