@@ -15,12 +15,13 @@ from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 # from flask_assets import Environment, Bundle # add later on a need basis
 
+SESSION_DURATION = 1 # in minutes
 
 app = Flask(__name__)
 cache = Cache(config={'CACHE_TYPE': 'redis'})
 cache.init_app(app)
 Compress(app)
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=2)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=SESSION_DURATION)
 # assets = Environment(app)
 # js = Bundle
 
@@ -32,8 +33,7 @@ def cleanup_expired_sessions():
     expired_sessions = [s for s, expiry in session_store.items() if expiry < current_time]
     for s in expired_sessions:
         directory = "/home/" + os.getlogin() + "/TEST/repos/" + s
-        print("Deleting directory", directory)
-        shutil.rmtree(directory)
+        delete_directory(directory)
         del session_store[s]
     if expired_sessions != []:
         print(f"Expired sessions cleaned up: {expired_sessions}")
@@ -94,6 +94,9 @@ def delete_directory(dir_path):
 
 ''' --------------------------- '''
 
+def refresh_session():
+    session.permanent = True
+    session.modified = True
 
 @app.route('/reload', methods=['POST'])
 def page_reload():
@@ -102,6 +105,7 @@ def page_reload():
     if 'EXECUTION_FOLDER' in session:
         delete_directory(session['EXECUTION_FOLDER'])
     session.clear()
+    refresh_session()
 
     return jsonify({'status': 'success'})
 
@@ -137,7 +141,7 @@ def upload_file():
     
     if 'first_visit' not in session:
         # print('First visit')
-        session.permanent = True
+        refresh_session()
         session['first_visit'] = True
         random_str = generate_random_string(10)
         UPLOAD_FOLDER, EXECUTION_FOLDER = create_session_folders(random_str)

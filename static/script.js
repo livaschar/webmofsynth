@@ -71,7 +71,7 @@ function submitJob() {
         error: function(error) {
             document.getElementById('submitButton').disabled = false;
             document.getElementById('loader').style.display = 'none'; // Hide loader
-            document.getElementById('jobStatus').innerText = 'An error occurred while submitting the job.';
+            document.getElementById('jobStatus').innerText = error;
         }
     });
 }
