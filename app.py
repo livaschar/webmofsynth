@@ -11,6 +11,8 @@ import shutil
 from pathlib import Path
 from flask_caching import Cache
 from flask_compress import Compress
+from datetime import datetime, timedelta
+from apscheduler.schedulers.background import BackgroundScheduler
 # from flask_assets import Environment, Bundle # add later on a need basis
 
 
@@ -18,8 +20,27 @@ app = Flask(__name__)
 cache = Cache(config={'CACHE_TYPE': 'redis'})
 cache.init_app(app)
 Compress(app)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=2)
 # assets = Environment(app)
 # js = Bundle
+
+session_store = {}
+
+
+def cleanup_expired_sessions():
+    current_time = datetime.now()
+    expired_sessions = [s for s, expiry in session_store.items() if expiry < current_time]
+    for s in expired_sessions:
+        directory = "/home/" + os.getlogin() + "/TEST/repos/" + s
+        print("Deleting directory", directory)
+        shutil.rmtree(directory)
+        del session_store[s]
+    if expired_sessions != []:
+        print(f"Expired sessions cleaned up: {expired_sessions}")
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=cleanup_expired_sessions, trigger="interval", seconds=60)
+scheduler.start()
 
 ''' random FOLDER GENERATOR '''
 def generate_random_string(length):
@@ -115,12 +136,15 @@ def upload_file():
         return jsonify({'error': 'Upload limit exceeded. You can upload up to 10 files.'}), 400
     
     if 'first_visit' not in session:
-        print('First visit')
+        # print('First visit')
+        session.permanent = True
         session['first_visit'] = True
         random_str = generate_random_string(10)
         UPLOAD_FOLDER, EXECUTION_FOLDER = create_session_folders(random_str)
         session['UPLOAD_FOLDER'] = UPLOAD_FOLDER
         session['EXECUTION_FOLDER'] = EXECUTION_FOLDER
+        userID = EXECUTION_FOLDER.rsplit('/', 1)[-1]
+        session_store[userID] = datetime.now() + app.config['PERMANENT_SESSION_LIFETIME']
         print("Created", UPLOAD_FOLDER, "for upload and", EXECUTION_FOLDER, "for execution")
 
     filenames = []
@@ -251,5 +275,7 @@ def page_not_found(error):
     
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=False)
-    # app.run(debug=False)
+    try: 
+        app.run(host='0.0.0.0', port=5000, debug=False)
+    except (KeyboardInterrupt, SystemExit):
+        scheduler.shutdown()
