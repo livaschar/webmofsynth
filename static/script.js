@@ -36,12 +36,12 @@ function uploadFiles() {
         contentType: false,
         success: function(response) {
             document.getElementById('uploadStatus').innerHTML = '<p>Files uploaded successfully</p>';
-            console.log(response);
+            // console.log(response);
             // Optionally, reset form or perform other actions upon success
         },
         error: function(error) {
             document.getElementById('uploadStatus').innerHTML = '<p>Error uploading files: ' + error.responseJSON.error + '</p>';
-            console.error(error);
+            // console.error(error);
             // Handle error response as needed
         }
     });
@@ -65,7 +65,7 @@ function submitJob() {
         success: function(response) {
             document.getElementById('loader').style.display = 'none'; // Hide loader
             document.getElementById('jobStatus').innerText = response.message;
-            console.log(response)
+            // console.log(response)
             document.getElementById('submitButton').disabled = false;
         },
         error: function(error) {
@@ -78,7 +78,7 @@ function submitJob() {
 
 
 function fetchResults(){
-    console.log("Fetching results...");
+    // console.log("Fetching results...");
     
     document.getElementById('loader').style.display = 'block'; // Show loader
 
@@ -98,7 +98,7 @@ function fetchResults(){
 
 
 function showCSV() {
-    console.log("Reading file...");
+    // console.log("Reading file...");
 
     $.ajax({
         url: '/show-csv',
@@ -133,7 +133,7 @@ function showCSV() {
 // }
 
 function downloadButton() {
-    console.log("Button clicked. Initiating download...");
+    // console.log("Button clicked. Initiating download...");
     window.location.href = '/download-csv';
 }
 
@@ -164,7 +164,7 @@ function downloadButton() {
 
 
 function readFile(){
-    console.log("Reading file...");
+    // console.log("Reading file...");
     
     $.ajax({
         url: '/read-file',
@@ -192,21 +192,14 @@ function notifyServerOfReload() {
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Server response:', data);
+        // console.log('Server response:', data);
     })
     .catch(error => {
         console.error('Error:', error);
     });
 }
 
-window.onload = function() {
-    // Use the modern Performance Navigation API
-    const navigationEntries = performance.getEntriesByType('navigation');
-    if (navigationEntries.length > 0) {
-        const navType = navigationEntries[0].type;
-        if (navType === 'reload') {
-            console.log('Page was reloaded');
-            notifyServerOfReload(); // Notify server of the reload
-        }
-    }
-};
+window.addEventListener("beforeunload", function (event) {
+    notifyServerOfReload();
+});
+

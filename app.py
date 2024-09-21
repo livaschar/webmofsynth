@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 # from flask_assets import Environment, Bundle # add later on a need basis
 
-SESSION_DURATION = 1 # in minutes
+SESSION_DURATION = 30 # in minutes
 
 app = Flask(__name__)
 cache = Cache(config={'CACHE_TYPE': 'redis'})
@@ -95,17 +95,21 @@ def delete_directory(dir_path):
 ''' --------------------------- '''
 
 def refresh_session():
-    session.permanent = True
-    session.modified = True
+    if not session:
+        session.permanent = True
+        session.modified = True
 
-@app.route('/reload', methods=['POST'])
-def page_reload():
-    print('Page reloaded')
-    
+def session_clear():
     if 'EXECUTION_FOLDER' in session:
         delete_directory(session['EXECUTION_FOLDER'])
     session.clear()
-    refresh_session()
+
+
+@app.route('/reload', methods=['POST'])
+def page_reload():
+    print('User reloaded or left')
+    
+    session_clear()
 
     return jsonify({'status': 'success'})
 
