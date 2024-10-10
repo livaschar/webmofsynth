@@ -1,0 +1,139 @@
+/* ------------------------------- */
+/* Table container styles */
+
+#converged-results, #discarded-results {
+    display: flex;
+    justify-content: center;
+    /* align-items: center; */
+    width: 100%;  /* Full width for both containers */
+    flex-wrap: wrap; /* Allow wrapping */
+}
+
+#converged-results .table{
+    width: 60%;  /* Ensure the table takes up the full width of its container */
+    max-width: 70%;  /* Prevent overflow and enable responsive resizing */
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    margin-top: 20px;
+    table-layout: auto; /* Allow the table to resize naturally based on content */
+}
+
+#discarded-results .table {
+    width: 60%;  /* Ensure the table takes up the full width of its container */
+    max-width: 70%;  /* Prevent overflow and enable responsive resizing */
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    margin-top: 20px;
+    table-layout: auto; /* Allow the table to resize naturally based on content */
+}
+
+#converged-results .table th, #converged-results .table td, 
+#discarded-results .table th, #discarded-results .table td {
+    padding: 8px;
+    text-align: center;
+    word-wrap: break-word; /* Ensures content wraps properly within the cell */
+}
+
+#converged-results .table th {
+    background-color: #888787;
+    color: #fff;
+} 
+
+#converged-results .table-striped tbody tr:nth-child(odd) {
+
+    background-color: #91a8f3;
+}
+
+#converged-results .table-striped tbody tr:nth-child(even) {
+    color: #fff;    
+    background-color: #656fc5;
+}
+
+#converged-results .table-bordered {
+    border: 1px solid #424242;
+}
+
+#converged-results .table-hover tbody tr:nth-child(odd):hover {
+    background-color: #e7e1e4;
+}
+#converged-results .table-hover tbody tr:nth-child(even):hover {
+    background-color: #a3a1a1;
+}
+
+
+#discarded-results .table th {
+    background-color: #e31b10;  /* Different header background for discarded table */
+    color: #ffffff;  /* Different text color */
+}
+
+#discarded-results .table-striped tbody tr:nth-child(odd) {
+    background-color: #fdd7d7;  /* Different striping for discarded table */
+}
+
+#discarded-results .table-striped tbody tr:nth-child(even) {
+    background-color: #f9c0c0;
+}
+
+#discarded-results .table-bordered {
+    border: 1px solid #ca150c;  /* Different border color */
+}
+
+#discarded-results .table-hover tbody tr:nth-child(odd):hover {
+    background-color: #ffffff;
+}
+
+#discarded-results .table-hover tbody tr:nth-child(even):hover {
+    background-color: #ffffff;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+    #converged-results .table, #discarded-results .table {
+        width: 100%; /* Take full width on smaller screens */
+    }
+    #converged-results, #discarded-results {
+        flex-direction: column; /* Stack tables vertically on smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    #converged-results .table, #discarded-results .table {
+        width: 100%;  /* Ensure both tables take up the full width on very small screens */
+    }
+}
+/* ------------------------------- */
+/* ------------------------------- */
+
+
+#notice p {
+    color: #f9f9f9;
+}
+
+
+#explanation {
+    width: 40%; /* Decreased width for a smaller box */
+    margin: 80px auto; /* Center the div and add vertical space */
+    padding: 10px; /* Reduced padding to make the box more compact */
+    background-color: #dbdbdb;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+#explanation h2 {
+    font-size: 0.95em;
+    color: #1a1a1a;
+    margin-bottom: 1px;
+    margin-top: 10px;
+}
+
+#explanation p {
+    font-size: 0.9em;
+    line-height: 1.6;
+    color: #303030;
+}
+
+#explanation strong {
+    font-weight: bold;
+    color: #0ab418;
+}

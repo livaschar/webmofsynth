@@ -1,3 +1,16 @@
+// Disable buttons on page load
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById('submitButton').disabled = true; // Initially disable the submit button
+    document.getElementById('showResultsButton').disabled = true; // Initially disable the Show Results button
+    document.getElementById('downloadCSVButton').disabled = true; // Initially disable the Download CSV button
+    // Check if we are on results.html
+    if (window.location.pathname.includes("results.html")) {
+        // Enable buttons if on results.html
+        document.getElementById('downloadCSVButton').disabled = false; 
+        }
+});
+
+
 function showSelectedFiles() {
     var input = document.getElementById('file');
     var fileList = document.getElementById('fileList');
@@ -26,7 +39,8 @@ function uploadFiles() {
     for (var i = 0; i < fileInput.files.length; i++) {
         formData.append('file', fileInput.files[i]);
     }
-
+    
+    document.getElementById('uploadStatus').innerText = '';
 
     $.ajax({
         url: '/upload',
@@ -35,14 +49,34 @@ function uploadFiles() {
         processData: false,
         contentType: false,
         success: function(response) {
-            document.getElementById('uploadStatus').innerHTML = '<p>Files uploaded successfully</p>';
+            // Join the filenames array with a newline character
+            let filenamesList = response.filenames.join('<br>'); // Using <br> for line breaks in HTML
+            // Display the success message and the filenames
+            document.getElementById('uploadStatus').innerHTML = response.message + '<br>' + filenamesList;
             // console.log(response);
-            // Optionally, reset form or perform other actions upon success
+            document.getElementById('submitButton').disabled = false;
         },
-        error: function(error) {
-            document.getElementById('uploadStatus').innerHTML = '<p>Error uploading files: ' + error.responseJSON.error + '</p>';
-            // console.error(error);
-            // Handle error response as needed
+        error: function(response) {
+            // Check if the response has a JSON error object
+            if (response.responseJSON && response.responseJSON.error) {
+                const errorMessage = response.responseJSON.error;
+                if (errorMessage.includes('An error occured')) {
+                    // Perform specific action for this error
+                    document.getElementById('uploadStatus').innerText = "Error: " + errorMessage;
+                    alert("Please Reload the page")
+                } else if (errorMessage.includes('404')) {
+                    // Handle other errors generically
+                    document.getElementById('uploadStatus').innerText = "Error: " + errorMessage
+                    alert("Please Reload the page")
+                } else {
+                    // Handle other errors generically
+                    document.getElementById('uploadStatus').innerText = "Error: " + errorMessage
+                }
+            } else {
+                // Fallback message for unknown errors
+                document.getElementById('uploadStatus').innerText = "Error: Uploading.\nIf error persists please contact us";
+                alert("Please Reload the page")
+            }
         }
     });
 
@@ -55,6 +89,7 @@ function submitJob() {
     var formData = new FormData(form);
     var selectedOption = formData.get('option');
 
+    document.getElementById('jobStatus').innerText = '';
     document.getElementById('loader').style.display = 'block'; // Show loader
     document.getElementById('submitButton').disabled = true;
 
@@ -64,47 +99,49 @@ function submitJob() {
         data: { option: selectedOption },
         success: function(response) {
             document.getElementById('loader').style.display = 'none'; // Hide loader
+            document.getElementById('submitButton').disabled = false;
+            document.getElementById('showResultsButton').disabled = false;
+            document.getElementById('downloadCSVButton').disabled = false;
             document.getElementById('jobStatus').innerText = response.message;
             // console.log(response)
-            document.getElementById('submitButton').disabled = false;
         },
-        error: function(error) {
-            document.getElementById('submitButton').disabled = false;
-            document.getElementById('loader').style.display = 'none'; // Hide loader
-            document.getElementById('jobStatus').innerText = error;
+        error: function(response) {
+            // Check if the response has a JSON error object
+            if (response.responseJSON && response.responseJSON.error) {
+                // Get the error message
+                const errorMessage = response.responseJSON.error;
+        
+                // Check for the specific error message
+                if (errorMessage.includes('No option selected.')) {
+                    // Perform specific action for this error
+                    document.getElementById('jobStatus').innerText = "Error: " + errorMessage;
+                    document.getElementById('submitButton').disabled = false;
+                } else {
+                    // Handle other errors generically
+                    document.getElementById('jobStatus').innerText = "Error: " + errorMessage
+                    document.getElementById('submitButton').disabled = true;
+                    document.getElementById('loader').style.display = 'none'; // Hide loader
+                    alert("Please Reload the page")
+                }
+            } else {
+                // Fallback message for unknown errors
+                document.getElementById('jobStatus').innerText = "An error occurred while uploading.";
+                document.getElementById('submitButton').disabled = true;
+                document.getElementById('loader').style.display = 'none'; // Hide loader
+                alert("Please Reload the page")
+            }
         }
     });
 }
 
-
-function fetchResults(){
-    // console.log("Fetching results...");
-    
-    document.getElementById('loader').style.display = 'block'; // Show loader
-
-    $.ajax({
-        url: '/fetch-results',
-        method: 'GET',
-        success: function(response) {
-            document.getElementById('loader').style.display = 'none'; // Hide loader
-            document.getElementById('results').innerText = response.message;
-        },
-        error: function(error) {
-            document.getElementById('loader').style.display = 'none'; // Hide loader
-            document.getElementById('results').innerText = 'An error occurred';
-        }
-    });
-}
 
 
 function showCSV() {
-    // console.log("Reading file...");
-
     $.ajax({
         url: '/show-csv',
         method: 'GET',
         success: function(response) {
-            if (response.table) {
+            if (response.success) {
                 // Redirect to the results page with the table data
                 window.location.href = '/print-results';
             } else {
@@ -117,46 +154,11 @@ function showCSV() {
     });
 }
 
-// function downloadButton(){
-//     console.log("Downloading file...");
-    
-//     $.ajax({
-//         url: '/download-csv',
-//         method: 'GET',
-//         success: function(response) {
-//             document.getElementById('results').innerText = response.message;
-//         },
-//         error: function(error) {
-//             document.getElementById('results').innerText = 'An error occurred';
-//         }
-//         });
-// }
 
 function downloadButton() {
     // console.log("Button clicked. Initiating download...");
     window.location.href = '/download-csv';
 }
-
-// PRINT WITHOUT CHANGING SCREEN
-// function readCSV(){
-//     console.log("Reading file...");
-    
-//     $.ajax({
-//         url: '/read-csv',
-//         method: 'GET',
-//         success: function(response) {
-//             if (response.table) {
-//                 document.getElementById('results').innerHTML = response.table;
-//             } else {
-//                 document.getElementById('results').innerText = 'Error: ' + response.error;
-//             }
-//         },
-//         error: function(error) {
-//             document.getElementById('results').innerText = 'An error occurred';
-//         }
-//     });
-// }
-
 
 
 // TESTS

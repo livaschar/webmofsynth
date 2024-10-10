@@ -1,6 +1,7 @@
 from src.mofsynth import utils
 from werkzeug.utils import secure_filename
-# import subprocess
+import pickle
+import json
 import time
 import os
 import pandas as pd
@@ -32,7 +33,7 @@ def cleanup_expired_sessions():
     current_time = datetime.now()
     expired_sessions = [s for s, expiry in session_store.items() if expiry < current_time]
     for s in expired_sessions:
-        directory = "/home/" + os.getlogin() + "/TEST/repos/" + s
+        directory = "/home/" + os.getlogin() + "/TEST/testing_app" + s
         delete_directory(directory)
         del session_store[s]
     if expired_sessions != []:
@@ -50,8 +51,8 @@ def generate_random_string(length):
 # Function to create session-specific folders if they don't exist
 def create_session_folders(random_str):
     session_folder = os.path.join(BASE_FOLDER, random_str)
-    UPLOAD_FOLDER = os.path.expanduser('~/TEST/repos/%s/uploads' %random_str)
-    INPUT_FOLDER = os.path.expanduser('~/TEST/repos/%s/input_data' %random_str)
+    UPLOAD_FOLDER = os.path.expanduser('~/TEST/testing_app/%s/uploads' %random_str)
+    INPUT_FOLDER = os.path.expanduser('~/TEST/testing_app/%s/input_data' %random_str)
     EXECUTION_FOLDER = session_folder
 
     # Create folders if they don't exist
@@ -70,7 +71,7 @@ def create_session_folders(random_str):
 
     return UPLOAD_FOLDER, EXECUTION_FOLDER
 
-BASE_FOLDER = os.path.expanduser('~/TEST/repos')
+BASE_FOLDER = os.path.expanduser('~/TEST/testing_app')
 SOURCE_FOLDER = os.getcwd() + '/src/mofsynth/input_data'
 original_folder = os.getcwd()
 # Necessary for using sessions
@@ -129,7 +130,7 @@ def index():
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
-        return jsonify({'error': 'No file part'}), 400
+        return jsonify({'error': 'No selected file'}), 400
 
     files = request.files.getlist('file')
 
@@ -141,7 +142,7 @@ def upload_file():
 
     # Check if file count exceeds the limit (10)
     if len(files) > 10:
-        return jsonify({'error': 'Upload limit exceeded. You can upload up to 10 files.'}), 400
+        return jsonify({'error': 'Upload limit exceeded.\nYou can upload up to 10 files.'}), 400
     
     if 'first_visit' not in session:
         # print('First visit')
@@ -166,11 +167,16 @@ def upload_file():
 
             filename = secure_filename(file.filename)
             filenames.append(filename)
-            file.save(os.path.join(session['UPLOAD_FOLDER'], filename))
-            session['file_count'] += 1
-            session['filenames'].append(filename)
+            try:
+                file.save(os.path.join(session['UPLOAD_FOLDER'], filename))
+            except:
+                return jsonify({'error': '404'}), 400
+            
+            if filename not in session['filenames']:
+                session['file_count'] += 1
+                session['filenames'].append(filename)
         else:
-            return jsonify({'error': 'Invalid file type. Allowed file types: .cif'}), 400
+            return jsonify({'error': 'Invalid file type.\nAllowed file types: .cif'}), 400
 
     print("Session in upload:", session)
 
@@ -185,57 +191,50 @@ def submit_job():
 
     option = request.form.get('option')
     if not option:
-        return jsonify({'error': 'No option selected'})
+        return jsonify({'error': 'No option selected.\nNan is a safe option.\nAdvise the paper for further information.'}), 400
 
     try:    
         # Execute the command and capture output
-        result, user = utils.main_run('uploads', option, session['EXECUTION_FOLDER'])
-
+        main_run_result, error, user, discarded = utils.main_run('uploads', option, session['EXECUTION_FOLDER'])
+        
+        if main_run_result == 0:
+            return jsonify({'error': error}), 400
+        
         # utils.main_run was succesful
-        if result == 1:
-            print('Result = 1' )
+        elif main_run_result == 1:
+            print('utils.main_run was succesfull' )
             
             # check which of the runs have finished and which not 
             counter = 0
-            finished = False
-            while not finished and counter < 10 :
-                converged, finished = utils.check_opt(session['EXECUTION_FOLDER'], session.get('file_count', 0), user)
-                time.sleep(5)
-                counter += 1
+            len_remaining_files = session.get('file_count', 0) - len(discarded.keys())
+            while counter < 10 :
+                print('\nCounter: ', counter)
+                check_opt_result, converged, not_converged = utils.check_opt(session['EXECUTION_FOLDER'], len_remaining_files, user)
+                if check_opt_result == 0 or check_opt_result == -1:
+                    print('  Converged:', converged)
+                    print('  Check opt is:', check_opt_result, '\n')
+                    time.sleep(3)
+                    counter += 1
+                elif check_opt_result == 1:
+                    break
             
-            # if all runs have finished
-            if finished and converged != []:
-                
-                if session.get('file_count', 0) == 1:
-                    print('Entered true mode')
-                    result = utils.export_results(session['EXECUTION_FOLDER'], user, compare = True)
-                else:
-                    result = utils.export_results(session['EXECUTION_FOLDER'], user, compare = False)
-                
-                # Check for errors or success based on command output
-                if result == 1:
-                    # return jsonify({'message': 'Runs were succesful. Results are ready.'})
-                    return jsonify({'message': 'Runs were succesful. Results are ready.'})
-                else:
-                    return jsonify({'error': 'Runs were succesful. Error processing the results.'})
+            if check_opt_result == 0:
+                utils.handle_non_convergence(user, not_converged, discarded, session['EXECUTION_FOLDER'])
+            elif check_opt_result == -1:
+                return jsonify({'error': 'Not a single file was converged'}), 400
             
-            elif finished and converged == []:
-                return jsonify({'message': 'No run was converged succesfully'})
-            
-            # if some runs have not finished
-            else:
-                return jsonify({'message': 'Error handling all/part of your CIFs'})    
-        
-        # No CIF was found
-        elif result == 2:
-            return jsonify({'message': 'No CIF to work with'})
+            export_result, message = utils.export_results(session['EXECUTION_FOLDER'], user)
+            if export_result == 1:                  
+                return jsonify({'message': message })
+            elif export_result == 0:
+                return jsonify({'error': 'Evaluation was succesful. Error processing the results.'}), 400
         
         # An error occured in utils.main_run
         else:
-            return jsonify({'message': 'Error submitting job'})
+            return jsonify({'error': 'Error submitting job'}), 400
     
     except Exception as e:
-        return jsonify({'error': 'Exception occurred', 'details': str(e)})
+        return jsonify({'error': 'Exception occurred.', 'details': str(e)}), 400
 
 
 @app.route('/show-csv')
@@ -245,23 +244,41 @@ def show_csv():
 
     try:
         if os.path.exists(file_path):
-            df = pd.read_csv(file_path)
-            table_html = df.to_html(classes='table table-striped table-bordered table-hover', index=False)
-            session['table_html'] = table_html
             
-            return jsonify({'table': table_html})
+            df = pd.read_csv(file_path)
+            converged_table = df.to_html(classes='table table-striped table-bordered table-hover', index=False)
+            session['converged_table'] = converged_table
+            
+            discarded_path = os.path.join(session['EXECUTION_FOLDER'], 'discarded.json')
+            with open(discarded_path, 'r') as json_file:
+                discarded_data = json.load(json_file)
+            
+            if discarded_data:
+                discarded_df = pd.DataFrame(list(discarded_data.items()), columns=['File', 'Error Message'])
+                print(f'discarded_df {discarded_df}')
+                discarded_table_html = discarded_df.to_html(classes='table table-striped table-bordered table-hover', index=False)
+            else:
+                discarded_table_html = "<p>No discarded files.</p>"
+            session['discarded_table'] = discarded_table_html
+            
+            return jsonify({'success': True})
+        
         else:
             return jsonify({'error': 'File not found'}), 404
+    
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 @app.route('/print-results')
 def print_results():
-    table_html = session.get('table_html')
-    if table_html:
-        return render_template('results.html', table=table_html)
+    # Retrieve tables from session
+    converged_table = session.get('converged_table')
+    discarded_table = session.get('discarded_table')
+    if discarded_table == "<p>No discarded files.</p>":
+        return render_template('results.html', converged_table=converged_table)
     else:
-        return render_template('error.html', error='No data to display')
+        return render_template('results.html', converged_table=converged_table, discarded_table=discarded_table)
+
 
 @app.route('/download-csv')
 def download_csv():
@@ -284,6 +301,6 @@ def page_not_found(error):
 
 if __name__ == '__main__':
     try: 
-        app.run(host='0.0.0.0', port=5000, debug=False)
+        app.run(host='0.0.0.0', port=8080, debug=False)
     except (KeyboardInterrupt, SystemExit):
         scheduler.shutdown()

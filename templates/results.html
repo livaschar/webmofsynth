@@ -5,14 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CSV Results</title>
     <link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="stylesheet" href="static/results_style.css">
     <link rel="stylesheet" href="static/style.css">
+    <script src="static/script.js"></script>
 </head>
-<body>
+<body>    
+    
     <h2 style="color: #ffffff;">Results</h2>
-    <div id="results">
-        {{ table|safe }}
+
+    <div id="converged-results">
+        {{ converged_table|safe }}
     </div>
     
+    {% if discarded_table %}
+    <h2 style="color: #ffffff;">Errors</h2>
+    <div id="discarded-results">
+        {{ discarded_table|safe }}
+    </div>
+    {% endif %}
+    
+    <!-- <div class="ResultsButton-container">
+        <button type="button" id="downloadCSVButton" onclick="downloadButton()">Download CSV</button>
+    </div> -->
     
     <div id="explanation">
         <h2>Energy Percentile Rank</h2>
@@ -92,8 +106,8 @@
             </a>
 
         </div>
-        <p>Cite this work: Paper under review.<br>
-        ©2024 Materials Modelling and Design Group. GNU General Public License v3.0 only.
+        <p>Cite this work: Under review.<br>
+        ©2024 <a href="https://www.chemistry.uoc.gr/mmdg" target="_blank" class="custom-link">Materials Modeling & Design group.</a> GNU General Public License v3.0 only.
         </p>
     </footer>
 

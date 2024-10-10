@@ -53,7 +53,7 @@ body {
     margin-bottom: 50px;
 }
 .header img {   
-    max-width: 15%;
+    max-width: 50%;
 }
 .header h1 {
     font-size: 1.5em;
@@ -104,6 +104,9 @@ body {
     border-radius: 5px;
     cursor: pointer;
 }
+.file-upload-container label:hover {
+    background-color: #636362;
+}
 
 .file-upload-container button {
     font-size: 1em;
@@ -133,16 +136,13 @@ body {
 }
 
 .file-upload-container #uploadStatus {
+    color: #ffffff;
     margin-top: 10px; /* Add margin-top to create space */
     margin-bottom: 5px; /* Add margin-top to create space */
 }
 /* ------------------------------- */
 /* ------------------------------- */
 
-
-.jobStatus-container #jobStatus{
-    color: #ffffff;
-}
 
 /* ------------------------------- */
 /* Options container styles */
@@ -199,89 +199,6 @@ body {
 
 
 /* ------------------------------- */
-/* Table container styles */
-#results {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-}
-
-
-.table {
-    width: 70%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-    margin-top: 20px;
-}
-
-.table th, .table td {
-    padding: 8px;
-    text-align: center;
-}
-
-.table th {
-    background-color: #888787;
-    color: #fff;
-}
-
-.table-striped tbody tr:nth-child(odd) {
-
-    background-color: #91a8f3;
-}
-
-.table-striped tbody tr:nth-child(even) {
-    color: #fff;    
-    background-color: #656fc5;
-}
-
-.table-bordered {
-    border: 1px solid #424242;
-}
-
-.table-hover tbody tr:nth-child(odd):hover {
-    background-color: #e7e1e4;
-}
-.table-hover tbody tr:nth-child(even):hover {
-    background-color: #a3a1a1;
-}
-/* ------------------------------- */
-/* ------------------------------- */
-
-
-
-#explanation {
-    width: 40%; /* Decreased width for a smaller box */
-    margin: 80px auto; /* Center the div and add vertical space */
-    padding: 10px; /* Reduced padding to make the box more compact */
-    background-color: #dbdbdb;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: left;
-}
-
-#explanation h2 {
-    font-size: 0.95em;
-    color: #1a1a1a;
-    margin-bottom: 1px;
-    margin-top: 10px;
-}
-
-#explanation p {
-    font-size: 0.9em;
-    line-height: 1.6;
-    color: #303030;
-}
-
-#explanation strong {
-    font-weight: bold;
-    color: #0ab418;
-}
-
-
-
-
-/* ------------------------------- */
 /* Loader container styles */
 .loader-container {
     display: flex;
@@ -329,15 +246,21 @@ body {
 /* ------------------------------- */
 
 
+.jobStatus-container #jobStatus{
+    color: #ffffff;
+}
+
+
+
 /* ------------------------------- */
 /* Buttons container styles */
-.button-container {
+.ResultsButton-container {
     display: flex;
     justify-content: center;
     align-items: center;
     margin-top: 20px;
 }
-.button-container button {
+.ResultsButton-container button {
     flex: 1;  /* Make buttons take equal space */
     max-width: 135px;  /* Set a maximum width if needed */
     background-color: #0c8674;
@@ -349,8 +272,12 @@ body {
     font-size: 1em;
     margin: 0 10px;
 }
-.button-container button:hover {
+.ResultsButton-container button:hover {
     background-color: #096053;
+}
+
+.ResultsButton-container button:disabled {
+    background-color: #636569;
 }
 /* ------------------------------- */
 /* ------------------------------- */
@@ -410,7 +337,7 @@ body {
     text-align: center;
     position: relative; /* Optional: Position relative to adjust the layout */
     bottom: 0; /* Optional: Position at the bottom */
-    width: 100%; /* Make the footer full width */
+    width: 100%; /* Full width */
 }
 /* ------------------------------- */
 /* ------------------------------- */
@@ -423,10 +350,16 @@ body {
     color: #333;
 }
 
+.footer p {
+    font-size: 1.2em;   /* Adjust font size if necessary */
+    color: #dfdcdd;
+}
+
 .sponsor-images {
     display: flex;
     justify-content: center; /* Aligns images horizontally */
     align-items: center;     /* Aligns images vertically if needed */
+    flex-wrap: wrap;         /* Ensures images wrap to next row */
     gap: 20px;               /* Space between the images */
     margin-bottom: 10px;
     margin-top: 20px;
@@ -435,7 +368,7 @@ body {
 /* General rule for all sponsor logos */
 .sponsor-images img {
     width: 90px;   /* Base size for all images */
-    height: auto;   /* Maintains aspect ratio */
+    height: auto;  /* Maintains aspect ratio */
 }
 
 /* Specific adjustments for ELIDEK and EU logos */
@@ -445,22 +378,44 @@ body {
 }
 
 .sponsor-images img[alt="MOSTH2 Logo"] {
-    width: 200px;  /* Increase ELIDEK logo size */
+    width: 200px;  /* Increase MOSTH2 logo size */
 }
+
 .sponsor-images img[alt="EU Logo"] {
     width: 180px;  /* Increase EU logo size */
     background-color: rgb(255, 255, 255);
 }
 
-.footer p {
-    font-size: 1em;   /* Adjust font size if necessary */
-    color: #cac7c8;
+/* Media query for mobile devices (e.g., tablets, smartphones) */
+@media (max-width: 768px) {
+    .sponsor-images img {
+        width: calc(30% - 10px); /* Two images per row */
+    }
+
+    /* Ensure these specific logos also adjust to two per row */
+    .sponsor-images img[alt="ELIDEK Logo"],
+    .sponsor-images img[alt="MOSTH2 Logo"],
+    .sponsor-images img[alt="EU Logo"] {
+        width: calc(30% - 10px);
+    }
+}
+
+/* Media query for even smaller screens (e.g., phones) */
+@media (max-width: 480px) {
+    .sponsor-images img {
+        width: calc(30% - 10px); /* Still two images per row for smaller screens */
+    }
+
+    /* Ensure these specific logos also adjust to two per row on smaller screens */
+    .sponsor-images img[alt="ELIDEK Logo"],
+    .sponsor-images img[alt="MOSTH2 Logo"],
+    .sponsor-images img[alt="EU Logo"] {
+        width: calc(30% - 10px); /* Two images per row */
+    }
 }
 
 
-
-
-
+/* will test in the future */
 /* ------------------------------- */
 /* Progress bar container styles */
 .progress-container {
