@@ -10,7 +10,7 @@ h2 {
     color: #e7e4e3; /* Change the color code as needed */
 }
 
-
+/* Links */
 .custom-link {
     text-decoration: none; /* Remove the underline */
     font-weight: bold; /* Make the text bold */
@@ -69,6 +69,49 @@ body {
     color: #cac7c8;
 }
 
+/* ------------------------------- */
+/* usage-explanation styles */
+.usage-explanation-container {
+    width: 300px;
+    margin: 20px auto;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: left;
+
+    /* background-color: rgba(86, 126, 138, 0.4); */
+    background-color: rgba(219, 219, 219, 1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);    
+    /* color: #ebebeb; */
+    color: #1a1a1a;
+}
+
+.usage-explanation-container h3 {
+    text-align: center;
+    margin-bottom: 10px;
+
+    /* color: #ffffff; */
+    color: #1a1a1a;
+}
+
+.usage-explanation-container ul {
+    font-size: 1em;
+    list-style-type: disc;  /* Enables bullet points */
+    padding-left: 10px;     /* Adds space for the bullets */
+}
+
+.usage-explanation-container li {
+    margin-bottom: 10px;
+}
+
+.usage-explanation-container p {
+    padding: 0; 
+    font-size: 0.9em;
+    text-align: justify;
+    
+    /* color: #c6c6c6; */
+    color: #303030;
+    
+}
 
 
 /* ------------------------------- */
@@ -76,11 +119,6 @@ body {
 .file-upload-container {
     width: 300px;
     margin: 50px auto;
-
-    /* display: flex;
-    justify-content: center;
-    align-items: center; */
-
     padding-top: 20px;
     padding-bottom: 10px;
     padding-left: 20px;
@@ -88,7 +126,7 @@ body {
     border-radius: 10px;
     text-align: center;
     background-color: rgba(86, 126, 138, 0.4);
-    color: #ebebeb;
+    color: #ffffff;
 }
 
 .file-upload-container input[type="file"] {
@@ -115,7 +153,7 @@ body {
     border-radius: 5px;
     background-color: #3272ab;
     /* background-color: #0e4597; */
-    color: #fff;
+    color: #ebebeb;
     cursor: pointer;
 }
 
@@ -136,7 +174,7 @@ body {
 }
 
 .file-upload-container #uploadStatus {
-    color: #ffffff;
+    color: #ebebeb;
     margin-top: 10px; /* Add margin-top to create space */
     margin-bottom: 5px; /* Add margin-top to create space */
 }
@@ -159,13 +197,8 @@ body {
 .options-container h3 {
     text-align: center;
     margin-bottom: 10px; 
-    color: #ebebeb;
+    color: #ffffff;
 }
-
-/* .options-container .options {
-    margin-top: 50px; /* Space between options and button */
-    /* margin-bottom: 50px; Space between options and button
-} */
 
 .options-container button {
     font-size: 1em;
@@ -177,9 +210,8 @@ body {
     border-radius: 5px;
     background-color: #3272ab;
     /* background-color: #0e4597; */
-    color: #fff;
-    cursor: pointer;
-    
+    color: #ebebeb;
+    cursor: pointer;    
 }
 
 .options-container button:hover {
