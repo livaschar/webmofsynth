@@ -89,6 +89,7 @@ def main_run(directory, supercell_limit, EXECUTION_FOLDER):
                 
             
             fragmentation_check, message = mof.fragmentation(user.synth_path)
+            
             if fragmentation_check == 0:
                 user.instances.pop()
                 discarded[cif] = message

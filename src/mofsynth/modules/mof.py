@@ -84,6 +84,7 @@ class MOF:
 
         """
         init_file = os.path.join(synth_path, self.name, "fragmentation", f"{self.name}_supercell.cif")
+        
         try:
             cif2mofid(init_file, output_path=os.path.join(synth_path, self.name, "fragmentation/Output"))
         except:

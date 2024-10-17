@@ -33,7 +33,7 @@ def cleanup_expired_sessions():
     current_time = datetime.now()
     expired_sessions = [s for s, expiry in session_store.items() if expiry < current_time]
     for s in expired_sessions:
-        directory = "/home/" + os.getlogin() + "/TEST/testing_app" + s
+        directory = "/home/" + os.getlogin() + "/TEST/repos" + s
         delete_directory(directory)
         del session_store[s]
     if expired_sessions != []:
@@ -51,8 +51,8 @@ def generate_random_string(length):
 # Function to create session-specific folders if they don't exist
 def create_session_folders(random_str):
     session_folder = os.path.join(BASE_FOLDER, random_str)
-    UPLOAD_FOLDER = os.path.expanduser('~/TEST/testing_app/%s/uploads' %random_str)
-    INPUT_FOLDER = os.path.expanduser('~/TEST/testing_app/%s/input_data' %random_str)
+    UPLOAD_FOLDER = os.path.expanduser('~/TEST/repos/%s/uploads' %random_str)
+    INPUT_FOLDER = os.path.expanduser('~/TEST/repos/%s/input_data' %random_str)
     EXECUTION_FOLDER = session_folder
 
     # Create folders if they don't exist
@@ -71,7 +71,7 @@ def create_session_folders(random_str):
 
     return UPLOAD_FOLDER, EXECUTION_FOLDER
 
-BASE_FOLDER = os.path.expanduser('~/TEST/testing_app')
+BASE_FOLDER = os.path.expanduser('~/TEST/repos')
 SOURCE_FOLDER = os.getcwd() + '/src/mofsynth/input_data'
 original_folder = os.getcwd()
 # Necessary for using sessions
@@ -207,7 +207,7 @@ def submit_job():
             # check which of the runs have finished and which not 
             counter = 0
             len_remaining_files = session.get('file_count', 0) - len(discarded.keys())
-            while counter < 10 :
+            while counter < 5 :
                 print('\nCounter: ', counter)
                 check_opt_result, converged, not_converged = utils.check_opt(session['EXECUTION_FOLDER'], len_remaining_files, user)
                 if check_opt_result == 0 or check_opt_result == -1:
@@ -301,6 +301,6 @@ def page_not_found(error):
 
 if __name__ == '__main__':
     try: 
-        app.run(host='0.0.0.0', port=8080, debug=False)
+        app.run(host='0.0.0.0', port=5000, debug=False)
     except (KeyboardInterrupt, SystemExit):
         scheduler.shutdown()
