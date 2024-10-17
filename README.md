@@ -22,11 +22,11 @@ minimizing the time and labor traditionally required for these experimental prep
 This allows researchers to focus more on innovative synthesis and experimental validation
 rather than on preparatory tasks.
 
-## 📰 Citing MOFSynth
-Paper under review
-
 ## 💻 Browser-Based MOFid
 Web version of MOFSynth at [link](https://mofsynth.website)
+
+## 📰 Citing MOFSynth
+Paper under review
 
 ## 📖 Usage example
 
