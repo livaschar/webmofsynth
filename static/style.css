@@ -414,37 +414,40 @@ body {
 }
 
 .sponsor-images img[alt="EU Logo"] {
-    width: 180px;  /* Increase EU logo size */
-    background-color: rgb(255, 255, 255);
+    width: 120px;  /* Increase EU logo size */
+    /* background-color: rgb(61, 62, 73); */
 }
 
-/* Media query for mobile devices (e.g., tablets, smartphones) */
+/* Media query for tablets or medium screens (e.g., tablets, larger smartphones) */
 @media (max-width: 768px) {
-    .sponsor-images img {
-        width: calc(30% - 10px); /* Two images per row */
+    .sponsor-images {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* Two images per row */
+        gap: 10px; /* Space between images */
     }
-
-    /* Ensure these specific logos also adjust to two per row */
-    .sponsor-images img[alt="ELIDEK Logo"],
-    .sponsor-images img[alt="MOSTH2 Logo"],
-    .sponsor-images img[alt="EU Logo"] {
-        width: calc(30% - 10px);
+    
+    /* Ensure the last image spans full width on smaller screens */
+    .sponsor-images a:nth-child(5) {
+        grid-column: span 2;
+        justify-self: center;
     }
 }
 
 /* Media query for even smaller screens (e.g., phones) */
 @media (max-width: 480px) {
-    .sponsor-images img {
-        width: calc(30% - 10px); /* Still two images per row for smaller screens */
+    .sponsor-images {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* Two images per row */
+        gap: 10px; /* Adjust spacing for smaller screens */
     }
-
-    /* Ensure these specific logos also adjust to two per row on smaller screens */
-    .sponsor-images img[alt="ELIDEK Logo"],
-    .sponsor-images img[alt="MOSTH2 Logo"],
-    .sponsor-images img[alt="EU Logo"] {
-        width: calc(30% - 10px); /* Two images per row */
+    
+    /* Ensure the last image spans full width */
+    .sponsor-images a:nth-child(5) {
+        grid-column: span 2;
+        justify-self: center;
     }
 }
+
 
 
 /* will test in the future */
