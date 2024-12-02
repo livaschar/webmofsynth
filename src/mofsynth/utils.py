@@ -44,7 +44,7 @@ def main_run(directory, supercell_limit, EXECUTION_FOLDER):
     if os.path.exists(user.settings_path):
         user.run_str, user.job_sh, user.opt_cycles = settings_from_file(user.settings_path)
     else:
-        return 0, 'Internal Error. Please contact us.', '', []
+        return 0, 'Internal Error. Our server is currently full. Please try later.', '', []
 
     print(f'  \033[1;32m\nSTART OF SYNTHESIZABILITY EVALUATION\033[m')
 
