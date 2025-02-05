@@ -33,7 +33,7 @@ def cleanup_expired_sessions():
     current_time = datetime.now()
     expired_sessions = [s for s, expiry in session_store.items() if expiry < current_time]
     for s in expired_sessions:
-        directory = "/home/" + os.getlogin() + "/TEST/repos" + s
+        directory = "/home/" + os.getlogin() + "/SITE/folders/" + s
         delete_directory(directory)
         del session_store[s]
     if expired_sessions != []:
@@ -51,8 +51,8 @@ def generate_random_string(length):
 # Function to create session-specific folders if they don't exist
 def create_session_folders(random_str):
     session_folder = os.path.join(BASE_FOLDER, random_str)
-    UPLOAD_FOLDER = os.path.expanduser('~/TEST/repos/%s/uploads' %random_str)
-    INPUT_FOLDER = os.path.expanduser('~/TEST/repos/%s/input_data' %random_str)
+    UPLOAD_FOLDER = os.path.expanduser('~/SITE/folders/%s/uploads' %random_str)
+    INPUT_FOLDER = os.path.expanduser('~/SITE/folders/%s/input_data' %random_str)
     EXECUTION_FOLDER = session_folder
 
     # Create folders if they don't exist
@@ -71,7 +71,7 @@ def create_session_folders(random_str):
 
     return UPLOAD_FOLDER, EXECUTION_FOLDER
 
-BASE_FOLDER = os.path.expanduser('~/TEST/repos')
+BASE_FOLDER = os.path.expanduser('~/SITE/folders')
 SOURCE_FOLDER = os.getcwd() + '/src/mofsynth/input_data'
 original_folder = os.getcwd()
 # Necessary for using sessions
