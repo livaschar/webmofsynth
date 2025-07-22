@@ -1,5 +1,5 @@
-# This file is part of MOF-Synth.
-# Copyright (C) 2023 Charalampos G. Livas
+# This file is part of WEB MOF-Synth.
+# Copyright (C) 2025 Charalampos G. Livas
 
 # MOF-Synth is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,42 +21,35 @@ import pickle
 from . modules.mof import MOF
 from . modules.linkers import Linkers
 from . modules.user import USER
-from . modules.other import (copy, settings_from_file, load_objects, write_csv_results)
+from . modules.other import (copy, load_objects, write_csv_results)
 
 def main_run(directory, supercell_limit, EXECUTION_FOLDER):
     r"""
     Perform the synthesizability evaluation for MOFs in the specified directory.
     """
+    print(f'  \033[1;32m\nSTART OF SYNTHESIZABILITY EVALUATION\033[m')
     discarded = {}
 
+    # CONFIGURATION BLOCK
     unique_user = 'USER' + EXECUTION_FOLDER.split('/')[-1]
     user = USER(unique_user)
-    
+    user.src_dir = EXECUTION_FOLDER
+    user.job_sh_path = os.path.join(EXECUTION_FOLDER, 'input_data')
+    user.job_sh_sp = 'job_sp.sh'
+    user.job_sh_opt = 'job_opt.sh'
+    user.opt_cycles = 1000
+
     # Create the working directory
     user.synth_path = os.path.join(EXECUTION_FOLDER, 'Synth_folder')
-    os.makedirs(user.synth_path, exist_ok=True)
-
-    # If settings file exists, read settings from there else ask for user input
-    user.settings_path = os.path.join(EXECUTION_FOLDER, 'input_data/settings.txt')
-    user.job_sh_path = os.path.join(EXECUTION_FOLDER, 'input_data')
-    user.src_dir = EXECUTION_FOLDER
-
-    if os.path.exists(user.settings_path):
-        user.run_str, user.job_sh, user.opt_cycles = settings_from_file(user.settings_path)
-    else:
-        return 0, 'Internal Error. Our server is currently full. Please try later.', '', []
-
-    print(f'  \033[1;32m\nSTART OF SYNTHESIZABILITY EVALUATION\033[m')
+    os.makedirs(user.synth_path, exist_ok=True)    
 
     # A list of cifs from the user specified directory
     user_dir = os.path.join(os.path.join(EXECUTION_FOLDER, directory))
     cifs = [item for item in os.listdir(user_dir) if item.endswith(".cif")]
-
-    # WARNING: No cif was found in: {user_dir}
     if cifs == []:
         return 0, 'CIF list is empty', '', []
 
-    # Start procedure for each cif
+    # Single Point procedure for each CIF
     for _, cif in enumerate(cifs):
 
         print(f'\n - \033[1;34mMOF under study: {cif[:-4]}\033[m -')
@@ -65,47 +58,39 @@ def main_run(directory, supercell_limit, EXECUTION_FOLDER):
         mof = MOF(cif[:-4], user.synth_path)
         user.instances.append(mof)
 
-        # Check if its already initialized a MOF object. Sometimes the code may break in the middle of a run.
-        # This serves as a quick way to ignore already analyzed instances.
-        if os.path.exists(os.path.join(mof.sp_path, "final.xyz")):
-            supercell_check = True
-        else:
-            # Copy .cif and job.sh in the mof directory
-            copy(user_dir, mof.init_path, f"{mof.name}.cif")
-            copy(user.job_sh_path, mof.sp_path, user.job_sh)
-
-            # Create supercell, do the fragmentation, extract one linker,
-            # calculate single point energy
-            supercell_check, message = mof.create_supercell(supercell_limit, user.synth_path)
-            if supercell_check == '0':
-                user.instances.pop()
-                discarded[cif] = message
-                continue
-                
-            elif supercell_check == '2':
-                user.instances.pop()
-                discarded[cif] = message
-                continue
-                
+        # Copy .cif and job.sh in the single point mof directory
+        copy(user_dir, mof.init_path, f"{mof.name}.cif")
+        copy(user.job_sh_path, mof.sp_path, user.job_sh_sp)
+        
+        # Supercell, Fragmentation, Extract Linker, SP Energy
+        supercell_check, message = mof.create_supercell(supercell_limit, user.synth_path)
+        if supercell_check == '0':
+            user.instances.pop()
+            discarded[cif] = message
+            continue
             
-            fragmentation_check, message = mof.fragmentation(user.synth_path)
+        elif supercell_check == '2':
+            user.instances.pop()
+            discarded[cif] = message
+            continue
+        
+        fragmentation_check, message = mof.fragmentation(user.synth_path)
+        if fragmentation_check == 0:
+            user.instances.pop()
+            discarded[cif] = message
+            continue
             
-            if fragmentation_check == 0:
-                user.instances.pop()
-                discarded[cif] = message
-                continue
-                
-            obabel_check, message = mof.obabel(user.synth_path)
-            if obabel_check == 0:
-                user.instances.pop()
-                discarded[cif] = message
-                continue
-                
-            single_point_check, message = mof.single_point()
-            if single_point_check == 0:
-                user.instances.pop()
-                discarded[cif] = message
-                continue
+        obabel_check, message = mof.obabel(user.synth_path)
+        if obabel_check == 0:
+            user.instances.pop()
+            discarded[cif] = message
+            continue
+            
+        single_point_check, message = mof.single_point()
+        if single_point_check == 0:
+            user.instances.pop()
+            discarded[cif] = message
+            continue
 
         # Check if supercell procedure runned correctly
         if supercell_check is False:
@@ -130,7 +115,7 @@ def main_run(directory, supercell_limit, EXECUTION_FOLDER):
     list_name_to_remove = []
     for linker in user.linker_instances:
         print(f'\n - \033[1;34mLinker under optimization study: {linker.smiles_code}, of {linker.mof_name}\033[m -')
-        opt_check, message = linker.optimize(user.opt_cycles, user.job_sh_path, user.job_sh)
+        opt_check, message = linker.optimize(user.opt_cycles, user.job_sh_path, user.job_sh_opt)
         if opt_check == 0:
             # Assuming user.instances contains instances of the MOF class
             list_name_to_remove.append(linker.mof_name)
@@ -142,10 +127,6 @@ def main_run(directory, supercell_limit, EXECUTION_FOLDER):
     # Filter instances based on the set
     user.instances = [instance for instance in user.instances if instance.name not in names_to_remove_set]
     user.linker_instances = [instance for instance in user.linker_instances if instance.mof_name not in names_to_remove_set]
-
-    # for name_to_remove in list_name_to_remove:
-    #     user.instances = [instance for instance in user.instances if instance.name != name_to_remove]
-    #     user.linker_instances = [instance for instance in user.linker_instances if instance.mof_name != name_to_remove]
 
     # Right instances of MOF class
     with open(os.path.join(EXECUTION_FOLDER, 'cifs.pkl'), 'wb') as file:
@@ -186,15 +167,15 @@ def check_opt(EXECUTION_FOLDER, len_files, user):
 
     if len(user.converged) == 0:
         return -1, '', ''
-        return 0, 'Evaluation converged for 0 CIF files'
+        # return 0, 'Evaluation converged for 0 CIF files'
     
     elif len(user.not_converged) != 0:
         return 0, user.converged, user.not_converged
-        error = 'Evaluation did not converge at the time limit for:\n '
-        for name in user.not_converged:
-            add = name + ', '
-            error += add
-        return 0, f'{error}.\nPlease remove them from your uploads.'
+        # error = 'Evaluation did not converge at the time limit for:\n '
+        # for name in user.not_converged:
+        #     add = name + ', '
+        #     error += add
+        # return 0, f'{error}.\nPlease remove them from your uploads.'
     
     elif len(user.converged) == len_files:
         return 1, user.converged, user.not_converged
@@ -254,46 +235,3 @@ def export_results(EXECUTION_FOLDER, user):
     user.results_csv_path = os.path.join(user.synth_path, f'{user.output_file_name}.csv')
     write_csv_results(results_list, os.path.join(EXECUTION_FOLDER, user.results_csv_path))    
     return 1, 'Evaluation was succesful. Results are ready.'
-
-'''
-def compare_to_others(EXECUTION_FOLDER, cifs):
-    print('YEAH')
-    import pandas as pd
-    from scipy.stats import percentileofscore
-    
-    # Load the Excel file
-    file_path = os.path.join(EXECUTION_FOLDER, 'input_data/databases.xlsx')
-    df = pd.read_excel(file_path)
-    
-    for mof in cifs:
-        # Create a new DataFrame row
-        example_row = pd.DataFrame({
-           'NAME': [mof.name],
-           'ENERGY_(OPT-SP)_[kcal/mol]': [mof.de*627.51],
-           'RMSD_[A]': [mof.rmsd]
-           })
-        df = pd.concat([df, example_row], ignore_index=True)
-    
-        # Sort by ENERGY_(OPT-SP)_[kcal/mol]
-        df_sorted_energy = df.sort_values(by='ENERGY_(OPT-SP)_[kcal/mol]', ascending=True).reset_index(drop=True)
-        df_sorted_energy['Energy_Rank'] = df_sorted_energy.index + 1
-        
-        # Sort by RMSD_[A]
-        df_sorted_rmsd = df.sort_values(by='RMSD_[A]', ascending=True).reset_index(drop=True)
-        df_sorted_rmsd['RMSD_Rank'] = df_sorted_rmsd.index + 1
-        
-        # Find the rank of the example
-        example_energy_rank = df_sorted_energy[df_sorted_energy['NAME'] == cifs[0].name]['Energy_Rank'].values[0]
-        example_rmsd_rank = df_sorted_rmsd[df_sorted_rmsd['NAME'] == cifs[0].name]['RMSD_Rank'].values[0]
-        
-        # Calculate percentile for energy
-        energy_scores = df['ENERGY_(OPT-SP)_[kcal/mol]']
-        example_energy_percentile = percentileofscore(energy_scores, cifs[0].de*627.51, kind='weak')
-        
-        # Calculate percentile for RMSD
-        rmsd_scores = df['RMSD_[A]']
-        example_rmsd_percentile = percentileofscore(rmsd_scores, cifs[0].rmsd, kind='weak')
-        
-        print(f'\nIt belongs to top {example_energy_percentile} %')
-        print('Rank rmsd:', example_rmsd_percentile)
-'''

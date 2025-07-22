@@ -221,7 +221,7 @@ def submit_job():
             if check_opt_result == 0:
                 utils.handle_non_convergence(user, not_converged, discarded, session['EXECUTION_FOLDER'])
             elif check_opt_result == -1:
-                return jsonify({'error': 'Not a single file was converged'}), 400
+                return jsonify({'error': 'None of the provided CIFs could be optimized'}), 400
             
             export_result, message = utils.export_results(session['EXECUTION_FOLDER'], user)
             if export_result == 1:                  

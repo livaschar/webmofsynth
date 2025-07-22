@@ -1,7 +1,5 @@
-
 from dataclasses import dataclass
 import os
-import re
 from . other import copy
 from . mof import MOF
 import subprocess
@@ -21,7 +19,7 @@ class Linkers:
 
         self.smiles_code = smiles_code
         self.mof_name = mof_name
-        self.opt_path = os.path.join(path_to_linkers_directory, self.smiles_code, self.mof_name) #!!!!!!!!!
+        self.opt_path = os.path.join(path_to_linkers_directory, self.smiles_code, self.mof_name)
         self.opt_energy = 0
         self.opt_status = 'not_converged'
 
@@ -30,39 +28,20 @@ class Linkers:
         except:
             return None
 
-    def optimize(self, opt_cycles, job_sh_path, job_sh):
+    def optimize(self, opt_cycles, job_sh_path, job_sh_opt):
         r"""
         Optimize the linker structure.
         """
         
         # Must be before os.chdir(self.opt_path)
-        copy(job_sh_path, self.opt_path, job_sh)
-        
-        init_file = os.path.join(self.opt_path, "linker.xyz")
-        final_file = os.path.join(self.opt_path, "final.xyz")
-        self.run_str_sp =  f"bash -l -c 'module load turbomole/7.02; x2t {init_file} > coord; uff; t2x -c > {final_file}'"
-
+        copy(job_sh_path, self.opt_path, job_sh_opt)
+        job_sh_path = os.path.join(self.opt_path, job_sh_opt)
+        run_str_opt = f'sbatch {job_sh_path}'
         try:
-            p = subprocess.Popen(self.run_str_sp, shell = True, cwd=self.opt_path)
+            p = subprocess.Popen(run_str_opt, shell=True, cwd=self.opt_path)
             p.wait()
         except:
-            return 0, f"Turbomole optimization procedure"
-
-        with open(os.path.join(self.opt_path, "control"), 'r') as f:
-            lines = f.readlines()
-        words = lines[2].split()
-        words[0] = str(opt_cycles)
-        lines[2] = ' '.join(words) +'\n'
-        with open(os.path.join(self.opt_path, "control"),'w') as f:
-            f.writelines(lines)
-
-        job_sh_path = os.path.join(self.opt_path, 'job.sh')
-        self.run_str = f'sbatch {job_sh_path}'
-        try:
-            p = subprocess.Popen(self.run_str, shell=True, cwd=self.opt_path)
-            p.wait()
-        except:
-            return 0, f"Turbomole optimization procedure"
+            return 0, f"XTB optimization error"
         
         return 1, ''
     
@@ -77,29 +56,42 @@ class Linkers:
         for linker in linkers_list:
             print(f'  LINKER: {linker.mof_name}')
 
-            if os.path.exists(os.path.join(linker.opt_path, 'uffconverged')):
-                print(f'    CONVERGED: {linker.mof_name}')
-                converged.append(linker)
-                linker.opt_status = 'converged'
-        
-            elif os.path.exists(os.path.join(linker.opt_path, 'not.uffconverged')):
-                print(f'    NOT CONVERGED: {linker.mof_name}')
-                not_converged.append(linker)
-            else:
+            opt_output_file = os.path.join(linker.opt_path,"check.out")
+            
+            try:
+                with open(opt_output_file, 'r') as f:
+                    content = f.read()
+            except:
+                linker.opt_status = 'no_output_file'
                 not_converged.append(linker)
                 print(f'    Still running')
+                continue
+            # Check convergence status
+            if "GEOMETRY OPTIMIZATION CONVERGED" in content:
+                print(f'    CONVERGED: {linker.mof_name}')
+                linker.opt_status = 'converged'
+                converged.append(linker)
+            elif "FAILED TO CONVERGE GEOMETRY OPTIMIZATION" in content:
+                print(f'    NOT CONVERGED: {linker.mof_name}')
+                linker.opt_status = 'not_converged'
+                not_converged.append(linker)
 
-            
         return converged, not_converged
     
     def read_linker_opt_energies(self):   
         r"""
         Read the optimization energy for a converged linker instance.
-        """        
-        with open(os.path.join(self.opt_path, 'uffenergy')) as f:
+        """
+        with open(os.path.join(self.opt_path, 'check.out')) as f:
             lines = f.readlines()
-        
-        self.opt_energy = lines[1].split()[-1]
+        for line in lines:
+            if "| TOTAL ENERGY" in line:
+                try:
+                    self.opt_energy = float(line.split()[3])
+                    print(self.opt_energy)
+                except:
+                    self.opt_energy = 0
+                break
 
         return self.opt_energy
 

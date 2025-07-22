@@ -1,11 +1,9 @@
-
 from dataclasses import dataclass
 import os
 import subprocess
 from mofid.run_mofid import cif2mofid
 from pymatgen.io.cif import CifWriter
 from pymatgen.core.structure import IStructure
-# from rdkit import Chem
 from . other import copy
 import numpy as np
 
@@ -38,11 +36,11 @@ class MOF:
         os.makedirs(self.cif2cell_path, exist_ok = True)
         self.obabel_path = os.path.join(synth_path, self.name, "obabel")
         os.makedirs(self.obabel_path, exist_ok = True)
-        self.turbomole_path = os.path.join(synth_path, self.name, "turbomole")
-        os.makedirs(self.turbomole_path, exist_ok = True)
-        self.sp_path = os.path.join(self.turbomole_path, "sp")
+        self.xtb_path = os.path.join(synth_path, self.name, "xtb")
+        os.makedirs(self.xtb_path, exist_ok = True)
+        self.sp_path = os.path.join(self.xtb_path, "sp")
         os.makedirs(self.sp_path, exist_ok = True)
-        self.rmsd_path = os.path.join(self.turbomole_path, "rmsd")
+        self.rmsd_path = os.path.join(self.xtb_path, "rmsd")
         os.makedirs(self.rmsd_path, exist_ok = True)
     
 
@@ -53,9 +51,7 @@ class MOF:
         copy(self.init_path, self.cif2cell_path, f"{self.name}.cif")
         
         init_file = os.path.join(synth_path, self.name, "cif2cell", f'{self.name}.cif')
-        print('\n\n Init file:', init_file)
         rename_file = os.path.join(synth_path, self.name, "cif2cell", f'{self.name}_supercell.cif')
-        print('Final file:', rename_file, '\n')
 
         try:
             structure = IStructure.from_file(init_file)
@@ -123,27 +119,25 @@ class MOF:
             return 0, f'Obabel error for {init_file}'
         ''' ----------- '''
     
-        copy(self.obabel_path, self.turbomole_path, "linker.xyz")
+        copy(self.obabel_path, self.xtb_path, "linker.xyz")
         
         return 1, ''
             
     def single_point(self):
         r"""
-        Perform a single-point calculation using Turbomole.
+        Perform a single-point calculation using XTB.
         """
-        copy(self.turbomole_path, self.sp_path, "linker.xyz")
-        init_file = os.path.join(self.turbomole_path, "sp", "linker.xyz")
-        final_file = os.path.join(self.turbomole_path, "sp", "final.xyz")
+        copy(self.xtb_path, self.sp_path, "linker.xyz")
         
         """ SINGLE POINT CALCULATION """
-        self.run_str_sp =  f"bash -l -c 'module load turbomole/7.02; x2t {init_file} > coord; uff; t2x -c > {final_file}'"
-        
+        job_sh_path = os.path.join(self.sp_path, 'job_sp.sh')
+        run_str_sp = f'sbatch {job_sh_path}'
         try:
-            p = subprocess.Popen(self.run_str_sp, shell=True, cwd=self.sp_path)
+            p = subprocess.Popen(run_str_sp, shell=True, cwd=self.sp_path)
             p.wait()
         except:
-            return 0, f"Turbomole single point error"
-        
+            return 0, f"XTB single point error"
+
         return 1, ''
 
     def check_fragmentation(self):
@@ -198,8 +192,6 @@ class MOF:
 
             linker = Linkers(instance.linker_smiles, instance.name, path_to_linkers_directory)
             linker_instances.append(linker)
-
-            copy(os.path.join(instance.fragmentation_path,"Output/MetalOxo"), os.path.join(path_to_linkers_directory, instance.linker_smiles, instance.name), 'linkers.cif', 'linkers.cif')
             
             copy(instance.obabel_path, os.path.join(path_to_linkers_directory, instance.linker_smiles, instance.name), 'linker.xyz', 'linker.xyz')
         
@@ -237,13 +229,13 @@ class MOF:
         for mof in cifs:
             linker = next((obj for obj in linkers if obj.smiles_code == mof.linker_smiles and obj.mof_name == mof.name), None)
 
-            with open(os.path.join(mof.sp_path, "uffgradient"), 'r') as f:
+            with open(os.path.join(mof.sp_path, "check.out"), 'r') as f:
                 lines = f.readlines()
             for line in lines:
-                if "cycle" in line:
-                    mof.sp_energy = float(line.split()[6])
+                if "| TOTAL ENERGY" in line:
+                    mof.sp_energy = float(line.split()[3])
                     break
-            
+            print('HAHA2')
             if linker != None and linker.smiles_code in best_opt_energy_dict.keys():
                 mof.opt_energy = float(linker.opt_energy)
                 mof.opt_status = linker.opt_status
@@ -306,19 +298,13 @@ class MOF:
     
         rmsd = []        
     
-        copy(best_opt_energy_dict[self.linker_smiles][1], self.rmsd_path, 'final.xyz', 'final_opt.xyz')
-        copy(self.sp_path, self.rmsd_path, 'final.xyz', 'final_sp.xyz')
+        copy(best_opt_energy_dict[self.linker_smiles][1], self.rmsd_path, 'xtbopt.xyz', 'final_opt.xyz')
+        copy(self.sp_path, self.rmsd_path, 'linker.xyz', 'final_sp.xyz')
         opt_file = os.path.join(self.rmsd_path, 'final_opt.xyz')
         sp_file = os.path.join(self.rmsd_path, 'final_sp.xyz')
         sp_mod_file = os.path.join(self.rmsd_path, 'final_sp_mod.xyz')
             
         check = MOF.rmsd_p(sp_file, opt_file, self.rmsd_path)
-
-        if check == False:
-            if input('Error while calculating the -p RMSD instance. Continue? [y/n]: ') == 'y':
-                pass
-            else:
-                return 0
     
         try:
             for sp in [sp_file, sp_mod_file]:
