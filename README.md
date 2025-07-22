@@ -9,6 +9,11 @@
 
 </h4>
 
+## 🔔 Release Note 3.0
+From Classical to Quantum calculations! Now the web application of MOFSynth uses XTB along with its semi-empirical calculations!
+Enjoy faster execution times and improved scalability. All dependencies are now open source, making MOFSynth fully transparent and reproducible.
+
+## What is Web-MOFSynth?
 Web-MOFSynth is an online tool for **MOF synthesizability evaluation**, with
 emphasis on reticular chemistry.
 
