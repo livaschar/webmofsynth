@@ -10,9 +10,9 @@
 </h4>
 
 ## 🔔 Release Note 3.0
-From Classical to Quantum calculations!
+**From Classical to Quantum calculations!**
 
-Now the web application of MOFSynth uses XTB along with its semi-empirical calculations!
+The updated web application of MOFSynth now uses XTB along with its semi-empirical calculations!
 
 Enjoy faster execution times and improved scalability. All dependencies are now open source, making MOFSynth fully transparent and reproducible.
 
