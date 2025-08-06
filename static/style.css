@@ -407,15 +407,19 @@ body {
 .sponsor-images img[alt="ELIDEK Logo"] {
     width: 180px;  /* Increase ELIDEK logo size */
     background-color: rgb(255, 255, 255);
+    padding: 5px;
+    border-radius: 5px;
 }
 
 .sponsor-images img[alt="MOSTH2 Logo"] {
-    width: 200px;  /* Increase MOSTH2 logo size */
+    width: 200px;
+    border-radius: 5px;
 }
 
 .sponsor-images img[alt="EU Logo"] {
-    width: 120px;  /* Increase EU logo size */
-    /* background-color: rgb(61, 62, 73); */
+    width: 120px;
+    padding: 5px;
+    border-radius: 20px;
 }
 
 /* Media query for tablets or medium screens (e.g., tablets, larger smartphones) */
