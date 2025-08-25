@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+
+[tool.setuptools.dynamic]
+version = {attr = "mofsynth.__version__"}
+
+[project]
+name = "mofsynth"
+dynamic = ["version"]
+authors = [
+  {name="Charalampos G. Livas", email="livas.charalampos@gmail.com"},
+]
+
+license = {text = "GPL-3.0-only"}
+description = "Package for MOF synthesizability evaluation."
+readme = "README.md"
+requires-python = ">=3.10"
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+	"License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: POSIX :: Linux",
+]
+
+
+dependencies = [
+    "mofsynth",
+    "gunicorn",
+    "cloudflared",
+    "flask",
+    "flask_compress",
+    "flask_caching",
+    "apscheduler",
+    "redis",
+    "openpyxl"
+]
+
+
+[project.urls]
+Homepage = "https://github.com/livaschar/webmofsynth"
+Issues = "https://github.com/livaschar/webmofsynth/issues"
+Documentation = "https://mofsynth.readthedocs.io/en/latest/"
+
+[project.scripts]
+
+mofsynth = "mofsynth.__main__:main"
