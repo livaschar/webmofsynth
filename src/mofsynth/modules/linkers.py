@@ -88,7 +88,7 @@ class Linkers:
             if "| TOTAL ENERGY" in line:
                 try:
                     self.opt_energy = float(line.split()[3])
-                    print(self.opt_energy)
+                    print(f'Opt energy:{self.opt_energy}')
                 except:
                     self.opt_energy = 0
                 break
@@ -104,5 +104,4 @@ class Linkers:
                     best_opt_energy_dict[instance.smiles_code] = [instance.opt_energy, instance.opt_path]
             else:
                 best_opt_energy_dict[instance.smiles_code] = [instance.opt_energy, instance.opt_path]
-                
         return best_opt_energy_dict

@@ -235,7 +235,6 @@ class MOF:
                 if "| TOTAL ENERGY" in line:
                     mof.sp_energy = float(line.split()[3])
                     break
-            print('HAHA2')
             if linker != None and linker.smiles_code in best_opt_energy_dict.keys():
                 mof.opt_energy = float(linker.opt_energy)
                 mof.opt_status = linker.opt_status

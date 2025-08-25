@@ -211,7 +211,6 @@ def submit_job():
                 print('\nCounter: ', counter)
                 check_opt_result, converged, not_converged = utils.check_opt(session['EXECUTION_FOLDER'], len_remaining_files, user)
                 if check_opt_result == 0 or check_opt_result == -1:
-                    print('  Converged:', converged)
                     print('  Check opt is:', check_opt_result, '\n')
                     time.sleep(3)
                     counter += 1
@@ -234,7 +233,7 @@ def submit_job():
             return jsonify({'error': 'Error submitting job'}), 400
     
     except Exception as e:
-        return jsonify({'error': 'Exception occurred.', 'details': str(e)}), 400
+        return jsonify({'error': f'Exception occurred. {str(e)}', 'details': str(e)}), 400
 
 
 @app.route('/show-csv')

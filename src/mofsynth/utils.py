@@ -216,9 +216,9 @@ def handle_non_convergence(user, not_converged, discarded, execution_folder):
 def export_results(EXECUTION_FOLDER, user):
     from . modules.other import load_objects
     import pandas as pd
-            
+        
     cifs, linkers, id_smiles_dict = load_objects(EXECUTION_FOLDER)
-   
+
     user.converged, user.not_converged = Linkers.check_optimization_status(linkers)
 
     for linker in user.converged:
