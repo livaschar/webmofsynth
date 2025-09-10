@@ -97,10 +97,10 @@ class MOF:
         except TimeoutException:
                 print(f"Timeout reached while Fragmentation {self.name}")
                 signal.alarm(0)
-                return 0, f'Fragmentation error for {init_file}'
+                return 0, f'Fragmentation error. Timeout reached.'
         except:
             signal.alarm(0)
-            return 0, f'Fragmentation error for {init_file}'
+            return 0, f'Fragmentation error.'
     
         copy(os.path.join(self.fragmentation_path, "Output/MetalOxo"), self.obabel_path, "linkers.cif")
         
@@ -120,7 +120,7 @@ class MOF:
         try:
             subprocess.run(command, capture_output=True, text=True, check=True)
         except:
-            return 0, f'Obabel error for {init_file}'
+            return 0, f'Obabel error. CIF to XYZ conversion.'
         
         xyz_file_initial = os.path.join(synth_path, self.name, "obabel", 'linkers_prom_222.xyz')
         xyz_file_final = os.path.join(synth_path, self.name, "obabel", 'linker.xyz')
@@ -133,7 +133,7 @@ class MOF:
         try:
             subprocess.run(command, capture_output=True, text=True, check=True)
         except:
-            return 0, f'Obabel error for {init_file}'
+            return 0, f'Obabel error. CIF to SMI conversion.'
         ''' ----------- '''
     
         copy(self.obabel_path, self.xtb_path, "linker.xyz")
@@ -153,7 +153,7 @@ class MOF:
             p = subprocess.Popen(run_str_sp, shell=True, cwd=self.sp_path)
             p.wait()
         except:
-            return 0, f"XTB single point error"
+            return 0, f"XTB single point error."
 
         return 1, ''
 
