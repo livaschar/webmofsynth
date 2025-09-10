@@ -6,7 +6,7 @@ from pymatgen.io.cif import CifWriter
 from pymatgen.core.structure import IStructure
 from . other import copy
 import numpy as np
-
+import signal
 
 @dataclass
 class MOF:
@@ -79,15 +79,32 @@ class MOF:
         Perform the fragmentation process for the MOF instance.
 
         """
+        
+        class TimeoutException(Exception):
+            pass
+
+        def handler(signum, frame):
+            raise TimeoutException()
+
+        signal.signal(signal.SIGALRM, handler)
+        signal.alarm(10)  # timeout in seconds
+
+
         init_file = os.path.join(synth_path, self.name, "fragmentation", f"{self.name}_supercell.cif")
         
         try:
             cif2mofid(init_file, output_path=os.path.join(synth_path, self.name, "fragmentation/Output"))
+        except TimeoutException:
+                print(f"Timeout reached while Fragmentation {self.name}")
+                signal.alarm(0)
+                return 0, f'Fragmentation error for {init_file}'
         except:
+            signal.alarm(0)
             return 0, f'Fragmentation error for {init_file}'
     
         copy(os.path.join(self.fragmentation_path, "Output/MetalOxo"), self.obabel_path, "linkers.cif")
         
+        signal.alarm(0)
         return 1, ''
  
     def obabel(self, synth_path):
