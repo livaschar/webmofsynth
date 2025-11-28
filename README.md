@@ -10,6 +10,11 @@
   
   [![Licensed under GPL-3.0-only](https://img.shields.io/badge/GPL--3.0--only-gold?label=License&labelColor=black)](https://spdx.org/licenses/GPL-3.0-only.html)
 
+  [![Classical Mechanics (UFF)](https://img.shields.io/badge/⚡%20CLASSICAL%20(CM)-UFF-blue?style=for-the-badge&labelColor=black)](https://mofsynth.website/cm_docs)
+  
+  [![Quantum Mechanics (gfn2-xtb)](https://img.shields.io/badge/⚛️%20QUANTUM%20(QM)-gfn2--xtb-purple?style=for-the-badge&labelColor=black)](https://mofsynth.website/qm_docs)
+
+
 </h4>
 
 
