@@ -12,7 +12,7 @@
 </h4>
 
 
-## 🔔 Release Note 3.0
+## 🔔 Release Note
 **MOFSynth Update: New Levels of Theory!**
 
 The updated web application of MOFSynth now lets you choose the Level of Theory: either Classical Mechanics (UFF) or Quantum Mechanics methods (gfn2-xtb).
