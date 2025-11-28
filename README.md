@@ -5,10 +5,12 @@
 </h1>
 
 <h4 align="center">
-
+[![Online App](https://img.shields.io/badge/🔥%20MOFSYNTH%20Online-Try%20Now!-red?style=for-the-badge&labelColor=black)](https://mofsynth.website)
 [![Licensed under GPL-3.0-only](https://img.shields.io/badge/GPL--3.0--only-gold?label=License&labelColor=black)](https://spdx.org/licenses/GPL-3.0-only.html)
 
 </h4>
+>
+
 
 ## 🔔 Release Note 3.0
 **MOFSynth Update: New Levels of Theory!**
