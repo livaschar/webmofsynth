@@ -13,9 +13,7 @@
 ## 🔔 Release Note 3.0
 **From Classical to Quantum calculations!**
 
-The updated web application of MOFSynth now uses XTB along with its semi-empirical calculations!
-
-Enjoy faster execution times and improved scalability. All dependencies are now open source, making MOFSynth fully transparent and reproducible.
+The updated web application of MOFSynth now lets you choose the Level of Theory: either Classical Mechanics (UFF) or Quantum Mechanics methods (gfn2-xtb)!
 
 ## What is Web-MOFSynth?
 Web-MOFSynth is an online tool for **MOF synthesizability evaluation**, with
