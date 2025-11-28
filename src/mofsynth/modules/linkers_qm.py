@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import os
-from . other import copy
-from . mof import MOF
+from . other_qm import copy
+from . mof_qm import MOF
 import subprocess
 
 

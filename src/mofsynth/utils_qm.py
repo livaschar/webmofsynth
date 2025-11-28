@@ -18,10 +18,10 @@
 import os
 import json
 import pickle
-from . modules.mof import MOF
-from . modules.linkers import Linkers
-from . modules.user import USER
-from . modules.other import (copy, load_objects, write_csv_results)
+from . modules.mof_qm import MOF
+from . modules.linkers_qm import Linkers
+from . modules.user_qm import USER
+from . modules.other_qm import (copy, load_objects, write_csv_results)
 
 def main_run(directory, supercell_limit, EXECUTION_FOLDER):
     r"""
@@ -214,7 +214,7 @@ def handle_non_convergence(user, not_converged, discarded, execution_folder):
 
 
 def export_results(EXECUTION_FOLDER, user):
-    from . modules.other import load_objects
+    from . modules.other_qm import load_objects
     import pandas as pd
         
     cifs, linkers, id_smiles_dict = load_objects(EXECUTION_FOLDER)

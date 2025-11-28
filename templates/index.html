@@ -15,7 +15,7 @@
 
 
 <body>
-    <div class="header">
+    <!-- <div class="header">
         <img src="static/images/logo/synth_logo_v3_white-removebg.png" alt="Logo" style="max-width: 350px; height: auto;">
         <h2 style="margin-top: 20px; color: #ee8945;">
             Version 3.0 Released — Now Featuring Quantum-Level Energy Calculations!
@@ -24,12 +24,44 @@
         <p>
             Developed by the <a href="https://www.chemistry.uoc.gr/mmdg" target="_blank" class="custom-link">Materials Modeling & Design Group</a> of the University of Crete
         </p>
+    </div> -->
+
+    <div class="header">
+        <img src="static/images/logo/synth_logo_v3_white-removebg.png"     alt="MOFSynth Logo" style="max-width: 350px; height: auto;">
+        
+        <h2 style="margin-top: 20px; color: #ee8945;">
+            New in Version 3.0: <span style="color: #fff;">Quantum-Enhanced Precision</span>
+        </h2>
+        
+        <h1 style="color: #527ec9;">A Computational Tool Toward Synthetic Likelihood Predictions of MOFs</h1>
+        
+        <p style="font-size: 1.1em; color: #ddd;">
+            Developed by the <a href="https://www.chemistry.uoc.gr/mmdg"     target="_blank" class="custom-link">Materials Modeling & Design Group</a>, University of Crete.
+        </p>
+    </div>
+    
+    <div class="usage-explanation-container">
+        <h3>0. Workflow</h3>
+        <ul>
+            <li><strong>Upload:</strong> Select up to 10 CIF files.</li>
+            <li><strong>Configure:</strong> Choose your accuracy level and supercell limits.</li>
+            <li><strong>Analyze:</strong> Our algorithms process geometric and energetic features.</li>
+            <li><strong>Result:</strong> Download synthetic likelihood predictions instantly.</li>
+        </ul>
+        <p>
+            *Tip: Setting a supercell limit improves convergence speed for complex lattices.
+        </p>
+        <br>
+        <p class="disclaimer">
+            <strong>Privacy:</strong> Your data is yours. We process files temporarily for analysis and permanently delete them immediately after completion.
+        </p>
     </div>
 
-    <div class="usage-explanation-container">
+    <!-- <div class="usage-explanation-container">
         <h3>0. Instructions</h3>
         <ul>
             <li>Upload your CIF files (limit: 10)</li>
+            <li>Choose level of theory</li>
             <li>Set a supercell limit*</li>
             <li>Start the evaluation</li>
             <li>View or Download results</li>
@@ -41,7 +73,8 @@
         <p class="disclaimer">
             <strong>Disclaimer:</strong> We do not store your data or save your uploaded files. All data is processed temporarily and deleted immediately after processing.
         </p>
-    </div>
+    </div> -->
+
 
     <div class="file-upload-container">
         <h3>1. Please insert your file</h3>
@@ -53,9 +86,53 @@
         </form>
         <div id="uploadStatus"></div>
     </div>
+
+    <!-- <div class="options-container">
+        <h3>2. Level of Theory:</h3>
+        <form id="submitFormLevelofTheory">
+            <input type="radio" id="optionCM" name="option" value="CM">
+            <label for="optionCM">Classical Mechanics</label><br>
+            <input type="radio" id="optionQM" name="option" value="QM">
+            <label for="optionQM">Quantum Mechanics</label><br>
+        </form>
+    </div> -->
     
     <div class="options-container">
-        <h3>2. Supercell limit (&#8491;):</h3>
+        <h3>2. Level of Theory:</h3>
+        <form id="submitFormLevelofTheory">
+            <div style="margin-bottom: 8px;">
+                <input type="radio" id="optionCM" name="option" value="CM">
+                <label for="optionCM" style="font-weight: bold;">Classical Mechanics</label>
+            </div>
+            <div>
+                <input type="radio" id="optionQM" name="option" value="QM">
+                <label for="optionQM" style="font-weight: bold;">Quantum Mechanics</label> <span style="color: #ee8945; font-size: 0.8em; font-weight: bold;">NEW!</span>
+            </div>
+        </form>
+    </div>
+    
+    <div class="options-container">
+        <h3>3. Supercell Limit (&#8491;):</h3>
+        <form id="submitForm">
+            <input type="radio" id="optionNone" name="option" value="None">
+            <label for="optionNone">No Limit (Auto)</label><br>
+            <input type="radio" id="option5" name="option" value="5">
+            <label for="option5">5 &#8491;</label><br>
+            <input type="radio" id="option10" name="option" value="10">
+            <label for="option10">10 &#8491;</label><br>
+            <input type="radio" id="option15" name="option" value="15">
+            <label for="option15">15 &#8491;</label><br>
+            <input type="radio" id="option20" name="option" value="20">
+            <label for="option20">20 &#8491;</label><br>
+            <br>
+            <button type="button" id='submitButton' onclick="submitJob()" disabled style="font-weight: bold;">
+                Run Prediction
+            </button>
+        </form>
+    </div>
+
+    <!-- <div class="options-container">
+        <h3>3. Supercell limit (&#8491;):</h3>
         <form id="submitForm">
             <input type="radio" id="optionNone" name="option" value="None">
             <label for="optionNone">Nan</label><br>
@@ -69,7 +146,7 @@
             <label for="option20">20</label><br>
             <button type="button" id='submitButton' onclick="submitJob()" disabled>Start Evaluation</button>
         </form>
-    </div>
+    </div> -->
     
     <div class="loader-container">
         <div class="loader" id="loader"></div>

@@ -27,6 +27,6 @@ __version__ = '3.0.1'
 __copyright__ = "Copyright (c) 2025 Charalampos G. Livas"
 __license__ = 'GPL-3.0-only'
 
-from . utils import (
-        main_run, check_opt, export_results
-        )
+# from . utils import (
+#         main_run, check_opt, export_results
+#         )

@@ -4,7 +4,7 @@ import subprocess
 from mofid.run_mofid import cif2mofid
 from pymatgen.io.cif import CifWriter
 from pymatgen.core.structure import IStructure
-from . other import copy
+from . other_qm import copy
 import numpy as np
 import signal
 
@@ -180,7 +180,7 @@ class MOF:
         Process MOF instances to assign unique identifiers to their SMILES codes and organize data for linkers.   
         """
 
-        from . linkers import Linkers
+        from . linkers_qm import Linkers
 
         # Iterate through mof instances
         unique_id = 0

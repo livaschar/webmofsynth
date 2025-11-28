@@ -84,57 +84,119 @@ function uploadFiles() {
 
 
 
-function submitJob() {
-    var form = document.getElementById('submitForm');
-    var formData = new FormData(form);
-    var selectedOption = formData.get('option');
+// function submitJob() {
+//     var form = document.getElementById('submitForm');
+//     var formData = new FormData(form);
+//     var selectedOption1 = formData.get('option');
 
+//     var form = document.getElementById('submitFormLevelofTheory');
+//     var formData = new FormData(form);
+//     var selectedOption2 = formData.get('option');
+
+//     document.getElementById('jobStatus').innerText = '';
+//     document.getElementById('loader').style.display = 'block'; // Show loader
+//     document.getElementById('submitButton').disabled = true;
+
+//     $.ajax({
+//         url: '/submit-job',
+//         method: 'POST',
+//         data: { option: selectedOption1 },
+//         success: function(response) {
+//             document.getElementById('loader').style.display = 'none'; // Hide loader
+//             document.getElementById('submitButton').disabled = false;
+//             document.getElementById('showResultsButton').disabled = false;
+//             document.getElementById('downloadCSVButton').disabled = false;
+//             document.getElementById('jobStatus').innerText = response.message;
+//             // console.log(response)
+//         },
+//         error: function(response) {
+//             // Check if the response has a JSON error object
+//             if (response.responseJSON && response.responseJSON.error) {
+//                 // Get the error message
+//                 const errorMessage = response.responseJSON.error;
+        
+//                 // Check for the specific error message
+//                 if (errorMessage.includes('No option selected.')) {
+//                     // Perform specific action for this error
+//                     document.getElementById('jobStatus').innerText = "Error: " + errorMessage;
+//                     document.getElementById('submitButton').disabled = false;
+//                 } else {
+//                     // Handle other errors generically
+//                     document.getElementById('jobStatus').innerText = "Error: " + errorMessage
+//                     document.getElementById('submitButton').disabled = true;
+//                     document.getElementById('loader').style.display = 'none'; // Hide loader
+//                     alert("Please Reload the page")
+//                 }
+//             } else {
+//                 // Fallback message for unknown errors
+//                 document.getElementById('jobStatus').innerText = "An error occurred while uploading.";
+//                 document.getElementById('submitButton').disabled = true;
+//                 document.getElementById('loader').style.display = 'none'; // Hide loader
+//                 alert("Please Reload the page")
+//             }
+//         }
+//     });
+// }
+
+function submitJob() {
+    // 1. Get Level of Theory (CM or QM)
+    var formTheory = document.getElementById('submitFormLevelofTheory');
+    var dataTheory = new FormData(formTheory);
+    var theoryVal = dataTheory.get('option'); 
+
+    // 2. Get Supercell Limit (None, 5, 10, etc.)
+    var formSupercell = document.getElementById('submitForm');
+    var dataSupercell = new FormData(formSupercell);
+    var supercellVal = dataSupercell.get('option');
+
+    // 3. Validation
+    if (!theoryVal || !supercellVal) {
+        document.getElementById('jobStatus').innerText = "Please select BOTH a Level of Theory and a Supercell limit.";
+        return;
+    }
+
+    // 4. UI Prep
     document.getElementById('jobStatus').innerText = '';
-    document.getElementById('loader').style.display = 'block'; // Show loader
+    document.getElementById('loader').style.display = 'block';
     document.getElementById('submitButton').disabled = true;
 
+    // 5. Send Request
     $.ajax({
         url: '/submit-job',
         method: 'POST',
-        data: { option: selectedOption },
+        data: { 
+            theory: theoryVal,          // e.g., 'CM' or 'QM'
+            supercell_limit: supercellVal // e.g., '5', '10', 'None'
+        },
         success: function(response) {
-            document.getElementById('loader').style.display = 'none'; // Hide loader
+            document.getElementById('loader').style.display = 'none';
             document.getElementById('submitButton').disabled = false;
             document.getElementById('showResultsButton').disabled = false;
             document.getElementById('downloadCSVButton').disabled = false;
             document.getElementById('jobStatus').innerText = response.message;
-            // console.log(response)
         },
         error: function(response) {
-            // Check if the response has a JSON error object
+            document.getElementById('loader').style.display = 'none';
+            
             if (response.responseJSON && response.responseJSON.error) {
-                // Get the error message
                 const errorMessage = response.responseJSON.error;
-        
-                // Check for the specific error message
-                if (errorMessage.includes('No option selected.')) {
-                    // Perform specific action for this error
-                    document.getElementById('jobStatus').innerText = "Error: " + errorMessage;
+                document.getElementById('jobStatus').innerText = "Error: " + errorMessage;
+                
+                // If error is just missing options, re-enable button immediately
+                if (errorMessage.includes('No option selected')) {
                     document.getElementById('submitButton').disabled = false;
                 } else {
-                    // Handle other errors generically
-                    document.getElementById('jobStatus').innerText = "Error: " + errorMessage
                     document.getElementById('submitButton').disabled = true;
-                    document.getElementById('loader').style.display = 'none'; // Hide loader
-                    alert("Please Reload the page")
+                    alert("Please Reload the page");
                 }
             } else {
-                // Fallback message for unknown errors
-                document.getElementById('jobStatus').innerText = "An error occurred while uploading.";
+                document.getElementById('jobStatus').innerText = "An error occurred.";
                 document.getElementById('submitButton').disabled = true;
-                document.getElementById('loader').style.display = 'none'; // Hide loader
-                alert("Please Reload the page")
+                alert("Please Reload the page");
             }
         }
     });
 }
-
-
 
 function showCSV() {
     $.ajax({

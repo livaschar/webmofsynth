@@ -1,4 +1,4 @@
-from src.mofsynth import utils
+from src.mofsynth import utils_cm, utils_qm
 from werkzeug.utils import secure_filename
 import pickle
 import json
@@ -183,26 +183,89 @@ def upload_file():
     return jsonify({'message': 'Files uploaded successfully', 'filenames': filenames}), 200
 
 
+# @app.route('/submit-job', methods=['POST'])
+# def submit_job():
+    
+#     # Session resets for some reason somewhere after upload_file() and before submit_job()
+#     print("Session in submit:", session)
+
+#     option = request.form.get('option')
+#     if not option:
+#         return jsonify({'error': 'No option selected.\nNan is a safe option.\nAdvise the paper for further information.'}), 400
+
+#     try:    
+#         # Execute the command and capture output
+#         main_run_result, error, user, discarded = utils.main_run('uploads', option, session['EXECUTION_FOLDER'])
+        
+#         if main_run_result == 0:
+#             return jsonify({'error': error}), 400
+        
+#         # utils.main_run was succesful
+#         elif main_run_result == 1:
+#             print('utils.main_run was succesfull' )
+            
+#             # check which of the runs have finished and which not 
+#             counter = 0
+#             len_remaining_files = session.get('file_count', 0) - len(discarded.keys())
+#             while counter < 5 :
+#                 print('\nCounter: ', counter)
+#                 check_opt_result, converged, not_converged = utils.check_opt(session['EXECUTION_FOLDER'], len_remaining_files, user)
+#                 if check_opt_result == 0 or check_opt_result == -1:
+#                     print('  Check opt is:', check_opt_result, '\n')
+#                     time.sleep(3)
+#                     counter += 1
+#                 elif check_opt_result == 1:
+#                     break
+            
+#             if check_opt_result == 0:
+#                 utils.handle_non_convergence(user, not_converged, discarded, session['EXECUTION_FOLDER'])
+#             elif check_opt_result == -1:
+#                 return jsonify({'error': 'None of the provided CIFs could be optimized'}), 400
+            
+#             export_result, message = utils.export_results(session['EXECUTION_FOLDER'], user)
+#             if export_result == 1:                  
+#                 return jsonify({'message': message })
+#             elif export_result == 0:
+#                 return jsonify({'error': 'Evaluation was succesful. Error processing the results.'}), 400
+        
+#         # An error occured in utils.main_run
+#         else:
+#             return jsonify({'error': 'Error submitting job'}), 400
+    
+#     except Exception as e:
+#         return jsonify({'error': f'Exception occurred. {str(e)}', 'details': str(e)}), 400
+
 @app.route('/submit-job', methods=['POST'])
 def submit_job():
     
-    # Session resets for some reason somewhere after upload_file() and before submit_job()
     print("Session in submit:", session)
 
-    option = request.form.get('option')
-    if not option:
-        return jsonify({'error': 'No option selected.\nNan is a safe option.\nAdvise the paper for further information.'}), 400
+    # --- 1. Retrieve Distinct Inputs ---
+    theory = request.form.get('theory')
+    supercell_limit = request.form.get('supercell_limit')
+    # --- 2. Validation ---
+    if not theory or not supercell_limit:
+        return jsonify({'error': 'Missing selection. Please select both Level of Theory and Supercell limit.'}), 400
+    
 
-    try:    
-        # Execute the command and capture output
-        main_run_result, error, user, discarded = utils.main_run('uploads', option, session['EXECUTION_FOLDER'])
+    try:
+        if theory == 'CM':
+            print('CM CHOSEN')
+            from src.mofsynth import utils_cm as utils
+            main_run_result, error, user, discarded = utils.main_run('uploads', supercell_limit, session['EXECUTION_FOLDER'])
+        elif theory == 'QM':
+            print('QM CHOSEN')
+            from src.mofsynth import utils_qm as utils
+            main_run_result, error, user, discarded = utils.main_run('uploads', supercell_limit, session['EXECUTION_FOLDER'])
+        else:
+            return jsonify({'error': 'Invalid Level of Theory selected.'}), 400
         
         if main_run_result == 0:
             return jsonify({'error': error}), 400
         
         # utils.main_run was succesful
         elif main_run_result == 1:
-            print('utils.main_run was succesfull' )
+            print('main_run was succesfull' )
             
             # check which of the runs have finished and which not 
             counter = 0
@@ -234,6 +297,7 @@ def submit_job():
     
     except Exception as e:
         return jsonify({'error': f'Exception occurred. {str(e)}', 'details': str(e)}), 400
+
 
 
 @app.route('/show-csv')
@@ -297,7 +361,6 @@ def download_csv():
 def page_not_found(error):
     return render_template('error.html'), 404
     
-
 if __name__ == '__main__':
     try: 
         app.run(host='0.0.0.0', port=5000, debug=False)
