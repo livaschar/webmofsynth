@@ -183,58 +183,6 @@ def upload_file():
     return jsonify({'message': 'Files uploaded successfully', 'filenames': filenames}), 200
 
 
-# @app.route('/submit-job', methods=['POST'])
-# def submit_job():
-    
-#     # Session resets for some reason somewhere after upload_file() and before submit_job()
-#     print("Session in submit:", session)
-
-#     option = request.form.get('option')
-#     if not option:
-#         return jsonify({'error': 'No option selected.\nNan is a safe option.\nAdvise the paper for further information.'}), 400
-
-#     try:    
-#         # Execute the command and capture output
-#         main_run_result, error, user, discarded = utils.main_run('uploads', option, session['EXECUTION_FOLDER'])
-        
-#         if main_run_result == 0:
-#             return jsonify({'error': error}), 400
-        
-#         # utils.main_run was succesful
-#         elif main_run_result == 1:
-#             print('utils.main_run was succesfull' )
-            
-#             # check which of the runs have finished and which not 
-#             counter = 0
-#             len_remaining_files = session.get('file_count', 0) - len(discarded.keys())
-#             while counter < 5 :
-#                 print('\nCounter: ', counter)
-#                 check_opt_result, converged, not_converged = utils.check_opt(session['EXECUTION_FOLDER'], len_remaining_files, user)
-#                 if check_opt_result == 0 or check_opt_result == -1:
-#                     print('  Check opt is:', check_opt_result, '\n')
-#                     time.sleep(3)
-#                     counter += 1
-#                 elif check_opt_result == 1:
-#                     break
-            
-#             if check_opt_result == 0:
-#                 utils.handle_non_convergence(user, not_converged, discarded, session['EXECUTION_FOLDER'])
-#             elif check_opt_result == -1:
-#                 return jsonify({'error': 'None of the provided CIFs could be optimized'}), 400
-            
-#             export_result, message = utils.export_results(session['EXECUTION_FOLDER'], user)
-#             if export_result == 1:                  
-#                 return jsonify({'message': message })
-#             elif export_result == 0:
-#                 return jsonify({'error': 'Evaluation was succesful. Error processing the results.'}), 400
-        
-#         # An error occured in utils.main_run
-#         else:
-#             return jsonify({'error': 'Error submitting job'}), 400
-    
-#     except Exception as e:
-#         return jsonify({'error': f'Exception occurred. {str(e)}', 'details': str(e)}), 400
-
 @app.route('/submit-job', methods=['POST'])
 def submit_job():
     
@@ -270,7 +218,7 @@ def submit_job():
             # check which of the runs have finished and which not 
             counter = 0
             len_remaining_files = session.get('file_count', 0) - len(discarded.keys())
-            while counter < 5 :
+            while counter < 10 :
                 print('\nCounter: ', counter)
                 check_opt_result, converged, not_converged = utils.check_opt(session['EXECUTION_FOLDER'], len_remaining_files, user)
                 if check_opt_result == 0 or check_opt_result == -1:
@@ -283,7 +231,7 @@ def submit_job():
             if check_opt_result == 0:
                 utils.handle_non_convergence(user, not_converged, discarded, session['EXECUTION_FOLDER'])
             elif check_opt_result == -1:
-                return jsonify({'error': 'None of the provided CIFs could be optimized'}), 400
+                return jsonify({'error': 'None of the provided CIFs could be optimized on the time limit'}), 400
             
             export_result, message = utils.export_results(session['EXECUTION_FOLDER'], user)
             if export_result == 1:                  
